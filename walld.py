@@ -14,6 +14,11 @@ if not os.path.exists(MAIN_FOLDER):
      + " folder!", file=sys.stderr)
     exit(1)
 
+def dprint(text):
+    if DEBUG:
+        print(text)
+
+class
 def download(url, file_name):
     with open(file_name, "wb") as file:
         response = requests.get(url)
