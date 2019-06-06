@@ -18,7 +18,6 @@ def tray_start():
             print('ok')
             menu_def[1][7][menu_def[1][7].index(menu_item)] = menu_item[1:]
             tray.Update(menu=menu_def)
-
         elif 'res' in menu_item:
             menu_def[1][7][menu_def[1][7].index(menu_item)] = '*' + menu_item
             tray.Update(menu=menu_def)
