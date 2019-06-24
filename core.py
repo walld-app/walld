@@ -15,7 +15,7 @@ def get_categories():
     list = []
     r = json.loads(requests.get(API, params=CPARAMS).text)
     for i in r['categories']:
-        list += i
+        list.append(i['name'] + '::category_')
     return list
 
 def download(url, file_name):
