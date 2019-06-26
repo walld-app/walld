@@ -1,19 +1,16 @@
 #!/bin/python3
-import requests, json, random, os, sys
+import requests, json, random, os, sys, sqlworker, config
 
-KEY = "25821352e1d420315f04ab8239a625e7"
-API = "https://wall.alphacoders.com/api2.0/get.php"
-MAIN_FOLDER = '/usr/share/backgrounds/walld'
-CPARAMS = {'auth':KEY, "method":"category_list"}
+CPARAMS = {'auth':config.KEY, "method":"category_list"}
 
-if not os.path.exists(MAIN_FOLDER):
+if not os.path.exists(config.MAIN_FOLDER):
     print("This installation is incorrect! can`t see " + MAIN_FOLDER\
      + " folder!", file=sys.stderr)
     exit(1)
 
 def get_categories():
     list = []
-    r = json.loads(requests.get(API, params=CPARAMS).text)
+    r = json.loads(requests.get(config.API, params=CPARAMS).text)
     for i in r['categories']:
         list.append(i['name'] + '::category_')
     return list
@@ -45,10 +42,13 @@ class Walld(object):
         else:
             return self.var
 
-    def save_image(self):
-        self.save_path =  MAIN_FOLDER+'/saved/' + str(random.random())
-        os.system('cp ' + MAIN_FOLDER+'/temp.jpg ' + MAIN_FOLDER + '/saved/' + str(random.random()))# имя бы достать
-        return 'saved at ' + self.save_path
+    def save_image(self, name = False):
+        if not name:
+            self.save_path =  MAIN_FOLDER+'/saved/' + str(random.random())
+        else:
+            self.save_path = name
+        os.system('cp ' + MAIN_FOLDER+'/temp.jpg ' + self.save_path)# имя бы достать
+        print('saved at ' + self.save_path)
 
     def guess_de(self):
         pass#need to guess current de
