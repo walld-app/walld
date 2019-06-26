@@ -3,6 +3,8 @@ import requests, json, random, os, sys, sqlworker, config
 
 CPARAMS = {'auth':config.KEY, "method":"category_list"}
 
+sql = sqlworker.Sql('temp/tt.db')
+
 if not os.path.exists(config.MAIN_FOLDER):
     print("This installation is incorrect! can`t see " + MAIN_FOLDER\
      + " folder!", file=sys.stderr)
@@ -53,6 +55,9 @@ class Walld(object):
     def guess_de(self):
         pass#need to guess current de
 
+    def add_option(self, name):
+
+        pass
     def spin_dice(self, chance):
         list = []
         for i in range(0, 10000):

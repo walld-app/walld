@@ -1,11 +1,9 @@
 #!/bin/python3
 import PySimpleGUIQt as sg
 import core
-import sqlworker
 import config
 
 walld = core.Walld()
-sql = sqlworker.Sql('./temp/tt.db')
 
 menu_def = ['BLANK', ['spin_dice', '---', '&Save', 'Save as...', 'Category',core.get_categories(),\
 'Resolution', ['16:9::res_', '16:10::res_', '21:9::res_'], 'E&xit']]
@@ -13,22 +11,18 @@ menu_def = ['BLANK', ['spin_dice', '---', '&Save', 'Save as...', 'Category',core
 tray = sg.SystemTray(menu=menu_def, filename=r'temp/kk.x-icon')
 
 def make_flip(item):
-    print('making flip')
     if "category_" in item:
-        target = menu_def[1][5][menu_def[1][5].index(item)]
+        place = 5
     elif "res_" in item:
-        target = menu_def[1][7][menu_def[1][7].index(item)]
+        place = 7
     if '*' in item:
-        pass
+        menu_def[1][place][menu_def[1][place].index(item)] = item[1:]
+        walld.remove_option(item)
     else:
-        target = '*' + item
-#            for i in menu[menu.index('Category') + 1]: #+1 необходим для попадания в подкатегории
-#                print(i)
-#                if i == item:
-#                    print (menu,'\n')
-#                    print(menu[menu.index('Category') + 1].index(item))
-#                    menu[[menu.index('Category')][menu.index('Category')].index(item)] = item + '*' #убейте меня нахуй
+        menu_def[1][place][menu_def[1][place].index(item)] = '*' + item
+        walld.add_option(item)
 def tray_start():
+    #необходимо поставить выделения все сначала выдернув их из базы
     while True:  # The event loop
         menu_item = tray.Read()
         print(menu_item)

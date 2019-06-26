@@ -10,6 +10,7 @@ class Sql:
             cursor.execute("SELECT * FROM pics")
             print('found db!')
         except sqlite3.OperationalError:
+            print('making new db')
             cursor.execute("""CREATE TABLE pics
             (id integer, category text, sub_category text, url text,
             how_many_used integer, likes integer, extra text)
@@ -18,5 +19,8 @@ class Sql:
             (categorys text, resolution text, api text,
             how_many_used integer, likes integer, extra text)
             """)
+            cursor.execute("""INSERT INTO settings VALUES
+            ('', '', '', '', '', '')""")
             conn.commit()
-            print('making new db')
+    def change_option(self, category):
+        pass
