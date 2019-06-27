@@ -14,7 +14,10 @@ def get_categories():
     list = []
     r = json.loads(requests.get(config.API, params=CPARAMS).text)
     for i in r['categories']:
-        list.append(i['name'] + '::category_')
+        if i['name'] != 'Abstract':
+            list.append('!' + i['name'] + '::category_')
+        else:
+            list.append(i['name'] + '::category_')
     return list
 
 def download(url, file_name):
@@ -56,7 +59,7 @@ class Walld(object):
         pass#need to guess current de
 
     def add_option(self, name):
-
+        sql.change_option()
         pass
     def spin_dice(self, chance):
         list = []
