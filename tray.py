@@ -47,4 +47,5 @@ def tray_start():
 
         elif menu_item == 'Save':
             walld.save_image()
+            
 tray_start()
