@@ -6,9 +6,9 @@ def get_categories():
     r = json.loads(requests.get(config.API, params=params).text)
     for i in r['categories']:
         if i['name'] != 'Abstract':
-            list.append('!' + i['name'] + '::category_')
+            list.append('!' + i['name'] + '::cat_')
         else:
-            list.append(i['name'] + '::category_')
+            list.append(i['name'] + '::cat_')
     return list
 
 def download(url, file_name):
@@ -51,7 +51,10 @@ class Walld(object):
     def guess_de(self):
         pass#need to guess current de
 
-    def add_option(self, name):
+    def get_settings(self):
+        return filer.settings
+
+    def add_option(self, name): # не очень это красиво, брат
         filer.change_option(name, add = True)
 
     def remove_option(self, name):
@@ -108,14 +111,21 @@ class Filer:
                 self.settings = pickle.load(file)
         except FileNotFoundError:
             print('file not found! creating new one')
-            self.settings = {'categorys' : [], 'resolutions' : []}
-            with open(config.SETTINGS_FILE, 'wb') as file:
-                pickle.dump(self.settings, file)
+            self.settings = []
+            self.dump()
 
-    def change_option(self, category, add = False):
+    def dump(self):
+        with open(config.SETTINGS_FILE, 'wb') as temp:
+            pickle.dump(self.settings, temp)
+
+    def change_option(self, name, add = False):
+        print(filer.settings)
         if add:# прописать pickle
-
-            command = ''
-        pass
+            print('adding', name)
+            self.settings.append(name)
+        else:
+            print('removing', name)
+            self.settings.remove(name)
+        self.dump()
 
 filer = Filer(config.DB_NAME)

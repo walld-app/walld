@@ -11,17 +11,32 @@ menu_def = ['BLANK', ['spin_dice', '---', '&Save', 'Save as...', 'Category',core
 tray = sg.SystemTray(menu=menu_def, filename=r'temp/kk.x-icon')
 
 def make_flip(item):
-    if "category_" in item:
+
+    print('this is item: ', item)
+    if "cat_" in item:
+        print('cat in item')
         place = 5
     elif "res_" in item:
         place = 7
     if '*' in item:
         menu_def[1][place][menu_def[1][place].index(item)] = item[1:]
-        walld.remove_option(item)
+        walld.remove_option(item[1:])
     else:
         menu_def[1][place][menu_def[1][place].index(item)] = '*' + item
         walld.add_option(item)
+
+def restore_settings():
+    for i in walld.get_settings():
+        if '::res_' in i:
+            place = 7
+        elif '::cat_' in i:
+            place = 5
+        print(i)
+        menu_def[1][place][menu_def[1][place].index(i)] = "*" + i
+    tray.Update(menu=menu_def)
+
 def tray_start():
+    restore_settings()
     #необходимо поставить выделения все сначала выдернув их из базы
     while True:  # The event loop
         menu_item = tray.Read()
@@ -33,12 +48,12 @@ def tray_start():
             apath = sg.PopupGetFile('hi',save_as=True, file_types=(('PNG files', '*.png' ),('JPEG files', '*.jpg')))
             walld.save_image(apath)
 
-        elif 'category_' in menu_item:
+        elif 'cat_' in menu_item:
             make_flip(menu_item)
             tray.Update(menu=menu_def)
         #ТУТ НУЖЕН ЦИКЛ FOR ДЛЯ ПРОШЕРСТЕНИЯ ВСЕХ ЛИСТОВ
             pass
-        elif 'res' in menu_item:
+        elif 'res_' in menu_item:
             make_flip(menu_item)
             tray.Update(menu=menu_def)
 
@@ -47,5 +62,5 @@ def tray_start():
 
         elif menu_item == 'Save':
             walld.save_image()
-            
+
 tray_start()
