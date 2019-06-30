@@ -8,6 +8,7 @@ walld = core.Walld()
 menu_def = ['BLANK', ['spin_dice', '---', '&Save', 'Save as...', 'Category',core.get_categories(),\
 'Resolution', ['16:9::res_', '16:10::res_', '21:9::res_'], 'E&xit']]
 
+
 tray = sg.SystemTray(menu=menu_def, filename=r'temp/kk.x-icon')
 
 def make_flip(item):
