@@ -88,7 +88,7 @@ class Walld(object):
             else:
                 print('pass, key was '+ str(key))
         else:
-            print('wops!')
+            pass
 
 class Filer:
     '''Abstraction for files and settings'''
