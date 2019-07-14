@@ -8,12 +8,9 @@ walld = core.Walld()
 menu_def = ['BLANK', ['spin_dice', '---', '&Save', 'Save as...', 'Category',core.get_categories(),\
 'Resolution', ['16:9::res_', '16:10::res_', '21:9::res_'], 'E&xit']]
 
-
 tray = sg.SystemTray(menu=menu_def, filename=r'temp/kk.x-icon')
 
 def make_flip(item):
-
-    print('this is item: ', item)
     if "cat_" in item:
         print('cat in item')
         place = 5
@@ -38,7 +35,6 @@ def restore_settings():
 
 def tray_start():
     restore_settings()
-    #необходимо поставить выделения все сначала выдернув их из базы
     while True:  # The event loop
         menu_item = tray.Read()
         print(menu_item)

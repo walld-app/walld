@@ -76,9 +76,8 @@ class Walld(object):
                     break
             else:
                 print('whoops')
-            #print(r['wallpapers'])
         for i in list:
-            key = random.randint(0, 100)# IDEA: ЧО ЕСЛИ ВЗЯТЬ ВЕСЬ СПИСОК И ТОЛЬКО ПО НЕМУ УЖЕ ХУЯЯЧИТЬ ТОЕСТЬ РАСПАРСИТЬ ВСЕ СТРАНИЧКИ И ЕБАШИТЬ УЖЕ ПО НЕМУ ПРОЦЕНТАМИ
+            key = random.randint(0, 100)
             if key >= chance:
                 print('ok, key is ' + str(key) +'\nPrinting out wall')
                 print('downloading', i['url_image'], '...', end = ' ')
