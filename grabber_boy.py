@@ -10,13 +10,13 @@ cursor.execute("""CREATE TABLE pics
 conn.commit()
 
 num = 0
-for i in range(0, 10000):
+for i in range(0, 100):
     PARAMS = {'auth':config.KEY, "method":"category",'id':'1',
-    'page':i, 'width': '1920',
+    'page':i, 'width': '2160',
     'height':'1080', 'operator':'min', 'info_level':'2'}
     r = json.loads(requests.get(config.API, params=PARAMS).text)
 
-    print('aha!', num)
+    print('aha!', num, i)
     num += 1
     if r['success']:
         if r['wallpapers']:

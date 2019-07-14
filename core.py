@@ -62,48 +62,27 @@ class Walld(object):
 
     def spin_dice(self, chance):
         list = []
-        for i in range(0, 20):
-            PARAMS = {'auth':config.KEY, "method":"category",'id':'1',
-            'page':i, 'width': '1920',
-            'height':'1080', 'operator':'min'}
-            r = json.loads(requests.get(config.API, params=PARAMS).text)
-            print('getting ', i)
-            if r['success']:
-                if r['wallpapers']:
-                    list += r['wallpapers']
-                else:
-                    print('breaking!')
-                    break
-            else:
-                print('whoops')
-        for i in list:
-            key = random.randint(0, 100)
-            if key >= chance:
-                print('ok, key is ' + str(key) +'\nPrinting out wall')
-                print('downloading', i['url_image'], '...', end = ' ')
-                download(i['url_image'], config.MAIN_FOLDER+'/temp.jpg')
-                print('ok!')#узнать бы как это более централизованно сделать
-                set_wall(config.MAIN_FOLDER+'/temp.jpg')
-                break
-            else:
-                print('pass, key was '+ str(key))
-        else:
-            pass
+        print(filer.get_urls('abstract'))
+        for i in filer.get_urls('abstract'):# нужно дергать настройки дабы узнать че дергать
+            print(i)
 
 class Filer:
     '''Abstraction for files and settings'''
     def __init__(self, db_name):
         self.db_name = db_name
         print('filer class is started, checking db!')
-        conn = sqlite3.connect(config.DB_NAME)
-        cursor = conn.cursor()
+        self.conn = sqlite3.connect(config.DB_NAME)
+        self.cursor = self.conn.cursor()
         try:
-            cursor.execute("SELECT * FROM pics")
+            self.cursor.execute("SELECT * FROM pics")
             print('found db!')
         except sqlite3.OperationalError:
             print('need to download db!')
             download(config.DB_URL, config.DB_NAME)
             print('ok!')
+            print('connecting!')
+            self.conn = sqlite3.connect(config.DB_NAME)
+            self.cursor = conn.cursor()
         print('checking options!')
         try:
             with open(config.SETTINGS_FILE, 'rb') as file:
@@ -116,6 +95,14 @@ class Filer:
     def dump(self):
         with open(config.SETTINGS_FILE, 'wb') as temp:
             pickle.dump(self.settings, temp)
+
+    def get_urls(self, category):
+        if category == 'abstract':
+            cat = "'Abstract'"
+        sql = "SELECT * FROM pics WHERE category='Abstract'"
+        self.cursor.execute(sql)
+        print(self.cursor.fetchall())
+        return self.cursor.fetchall()
 
     def change_option(self, name, add = False):
         print(filer.settings)
