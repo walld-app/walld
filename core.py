@@ -64,8 +64,9 @@ class Walld(object):
         list = []
         print(filer.get_urls('abstract'))
         for i in filer.get_urls('abstract'):# нужно дергать настройки дабы узнать че дергать
-            print(i)
-
+            list.append(i[4])
+        print(list)
+        print(random.choice(list))
 class Filer:
     '''Abstraction for files and settings'''
     def __init__(self, db_name):
@@ -99,9 +100,8 @@ class Filer:
     def get_urls(self, category):
         if category == 'abstract':
             cat = "'Abstract'"
-        sql = "SELECT * FROM pics WHERE category='Abstract'"
-        self.cursor.execute(sql)
-        print(self.cursor.fetchall())
+        self.sql = "SELECT * FROM pics WHERE category='Abstract'"
+        self.cursor.execute(self.sql)
         return self.cursor.fetchall()
 
     def change_option(self, name, add = False):
