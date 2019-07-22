@@ -71,9 +71,9 @@ class Filer:
     def __init__(self, db_name):
         self.db_name = db_name
         print('filer class is started, checking db!')
-        self.conn = sqlite3.connect(config.DB_NAME)
-        self.cursor = self.conn.cursor()
         try:
+            self.conn = sqlite3.connect(config.DB_NAME)
+            self.cursor = self.conn.cursor()
             self.cursor.execute("SELECT * FROM pics")
             print('found db!')
         except sqlite3.OperationalError:
