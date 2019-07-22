@@ -15,6 +15,7 @@ def download(url, file_name):
     with open(file_name, "wb") as file:
         response = requests.get(url)
         file.write(response.content)
+    return file_name
 
 def set_wall(file_name):
     mon_list = os.popen('/usr/bin/xfconf-query -c \
@@ -66,7 +67,8 @@ class Walld(object):
         for i in filer.get_urls('abstract'):# нужно дергать настройки дабы узнать че дергать
             list.append(i[4])
         print(list)
-        print(random.choice(list))
+        set_wall(download(random.choice(list),config.MAIN_FOLDER+'/temp.jpg'))
+
 class Filer:
     '''Abstraction for files and settings'''
     def __init__(self, db_name):
