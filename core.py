@@ -96,7 +96,7 @@ class Filer:
             print('ok!')
             print('connecting!')
             self.conn = sqlite3.connect(config.DB_NAME)
-            self.cursor = conn.cursor()
+            self.cursor = self.conn.cursor()
         print('checking options!')
         try:
             with open(config.SETTINGS_FILE, 'rb') as file:
