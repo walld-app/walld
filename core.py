@@ -27,7 +27,7 @@ def set_wall(file_name):
             --channel xfce4-desktop --property '+ i +' --set ' + file_name)
     elif walld.guess_de() == 'mate': #experimental
         os.system("dconf write \
-        /org/mate/desktop/background/picture-filename \"'PATH-TO-JPEG'\""")
+        /org/mate/desktop/background/picture-filename \"'PATH-TO-JPEG'\"")
     elif Walld.guess_de() == 'gnome':
         os.system('gsettings set \
         org.gnome.desktop.background picture-uri file://'+ file_name)
@@ -81,7 +81,7 @@ class Filer:
     '''Abstraction for files and settings'''
     def __init__(self, db_name):
         self.db_name = db_name
-        if not os.path.exists(config.MAIN_FOLDER()):
+        if not os.path.exists(config.MAIN_FOLDER):
             print('creating!' + config.MAIN_FOLDER)
             os.mkdir(config.MAIN_FOLDER)
         print('filer class is started, checking db!')
