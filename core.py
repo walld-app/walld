@@ -1,4 +1,4 @@
-oiimport requests, json, random, os, sys, config, pickle, sqlite3
+import requests, json, random, os, sys, config, pickle, sqlite3
 
 def get_categories():
     list = []
