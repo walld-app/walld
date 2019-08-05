@@ -1,4 +1,4 @@
-import requests, json, random, os, sys, config, pickle, sqlite3
+oiimport requests, json, random, os, sys, config, pickle, sqlite3
 
 def get_categories():
     list = []
@@ -18,18 +18,26 @@ def download(url, file_name):
     return file_name
 
 def set_wall(file_name):
-    mon_list = os.popen('/usr/bin/xfconf-query -c \
-    xfce4-desktop -l | grep "workspace0/last-image"').read().split()
-    for i in mon_list:
-        print(i)
-        os.system('xfconf-query \
-        --channel xfce4-desktop --property '+ i +' --set ' + file_name)
+    if walld.guess_de() == 'xfce':
+        mon_list = os.popen('/usr/bin/xfconf-query -c \
+        xfce4-desktop -l | grep "workspace0/last-image"').read().split()
+        for i in mon_list:
+            print(i)
+            os.system('xfconf-query \
+            --channel xfce4-desktop --property '+ i +' --set ' + file_name)
+    elif walld.guess_de() == 'mate': #experimental
+        os.system("dconf write \
+        /org/mate/desktop/background/picture-filename \"'PATH-TO-JPEG'\""")
+    elif Walld.guess_de() == 'gnome':
+        os.system('gsettings set \
+        org.gnome.desktop.background picture-uri file://'+ file_name)
 
 class Walld(object):
     '''this class represents almost all walld functions except trays one'''
     def __init__(self):
         if not os.path.exists(config.MAIN_FOLDER):
-            print("This installation is incorrect! can`t see " + config.MAIN_FOLDER\
+            print("This installation is incorrect! can`t see "
+            + config.MAIN_FOLDER
             + " folder!", file=sys.stderr)
             exit(1)
         print('class walld started!')
@@ -50,7 +58,7 @@ class Walld(object):
         print('saved at ' + self.save_path)
 
     def guess_de(self):
-        pass#need to guess current de
+        return os.system("env | grep DESKTOP_SESSION= | awk -F= '{print $2}'")
 
     def get_settings(self):
         return filer.settings
@@ -73,6 +81,9 @@ class Filer:
     '''Abstraction for files and settings'''
     def __init__(self, db_name):
         self.db_name = db_name
+        if not os.path.exists(config.MAIN_FOLDER()):
+            print('creating!' + config.MAIN_FOLDER)
+            os.mkdir(config.MAIN_FOLDER)
         print('filer class is started, checking db!')
         try:
             self.conn = sqlite3.connect(config.DB_NAME)
