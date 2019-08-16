@@ -17,18 +17,21 @@ def download(url, file_name):
         file.write(response.content)
     return file_name
 
+
 def set_wall(file_name):
-    if walld.guess_de() == 'xfce':
+    de = os.popen("env | grep DESKTOP_SESSION= | awk -F= '{print $2}'").read()
+    print('this is de', de)
+    if de == 'xfce':
         mon_list = os.popen('/usr/bin/xfconf-query -c \
         xfce4-desktop -l | grep "workspace0/last-image"').read().split()
+    #print('hi',mon_list)
         for i in mon_list:
-            print(i)
             os.system('xfconf-query \
             --channel xfce4-desktop --property '+ i +' --set ' + file_name)
-    elif walld.guess_de() == 'mate': #experimental
+    elif de == 'mate': #experimental
         os.system("dconf write \
         /org/mate/desktop/background/picture-filename \"'PATH-TO-JPEG'\"")
-    elif Walld.guess_de() == 'gnome':
+    elif de == 'gnome':
         os.system('gsettings set \
         org.gnome.desktop.background picture-uri file://'+ file_name)
 
@@ -57,8 +60,6 @@ class Walld(object):
         os.system('cp ' + config.MAIN_FOLDER+'/temp.jpg ' + self.save_path)# имя бы достать
         print('saved at ' + self.save_path)
 
-    def guess_de(self):
-        return os.system("env | grep DESKTOP_SESSION= | awk -F= '{print $2}'")
 
     def get_settings(self):
         return filer.settings
@@ -71,10 +72,8 @@ class Walld(object):
 
     def spin_dice(self, chance):
         list = []
-        print(filer.get_urls('abstract'))
         for i in filer.get_urls('abstract'):# нужно дергать настройки дабы узнать че дергать
             list.append(i[4])
-        print(list)
         set_wall(download(random.choice(list),config.MAIN_FOLDER+'/temp.jpg'))
 
 class Filer:
