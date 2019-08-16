@@ -45,6 +45,9 @@ def tray_start():
             apath = sg.PopupGetFile('hi',save_as=True, file_types=(('PNG files', '*.png' ),('JPEG files', '*.jpg')))
             walld.save_image(apath)
 
+        elif menu_item == '__ACTIVATED__':
+            walld.spin_dice(99)
+            
         elif 'cat_' in menu_item:
             make_flip(menu_item)
             tray.Update(menu=menu_def)
