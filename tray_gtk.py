@@ -20,13 +20,11 @@ class TrayIcon(Gtk.StatusIcon):
 
         menu_item1 = Gtk.MenuItem(label = "First Entry", submenu= submenu)
         menu.append(menu_item1)
-        menu_item1.connect("activate", print, 'll')
+        #menu_item1.connect("activate", print, 'll')
 
         menu_item2 = Gtk.MenuItem(label = "Quit")
         submenu.append(menu_item2)
         menu_item2.connect("activate", Gtk.main_quit)
-
-
 
         submenu.show_all()
         submenu.popup(None, None, None, self, 3, time)
