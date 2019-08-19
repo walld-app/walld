@@ -9,7 +9,7 @@ import requests
 import config
 
 def get_categories():
-    '''gets a list of all categorys by api method'''
+    '''gets a list of all categories by api method'''
     list_categories = []
     params = {'auth':config.KEY, "method":"category_list"}
     json_answer = json.loads(requests.get(config.API, params=params).text)
@@ -26,7 +26,6 @@ def download(url, file_name):
         response = requests.get(url)
         file.write(response.content)
     return file_name
-
 
 
 class Walld():
@@ -49,13 +48,13 @@ class Walld():
             os.system('cp ' + config.MAIN_FOLDER+'/temp.jpg ' + name)
             print('saved at ' + name)
         else:
-            os.system('cp ' + config.MAIN_FOLDER+'/temp.jpg ' + self.save_path)# имя бы достать
+            os.system('cp ' + config.MAIN_FOLDER+'/temp.jpg ' + self.save_path)
             print('saved at ' + self.save_path)
 
     def spin_dice(self):
         '''making a list of urls by accessing a db, than sets wall'''
         list_of_urls = []
-        for i in FILER.get_cells('abstract'):# нужно дергать настройки дабы узнать че дергать
+        for i in FILER.get_cells('Abstract'):
             list_of_urls.append(i[4])
         self.set_wall(download(random.choice(list_of_urls),\
          config.MAIN_FOLDER+'/temp.jpg'))
@@ -75,6 +74,17 @@ class Walld():
         elif self.desktop_environment == 'gnome\n': #experimental
             os.system('/usr/bin/gsettings set \
             org.gnome.desktop.background picture-uri file://'+ file_name)
+
+    def change_option(self, name, add=False):
+        '''need to rewrite it'''
+        print(FILER.settings)
+        if add:
+            print('adding', name)
+            FILER.settings.append(name)
+        else:
+            print('removing', name)
+            FILER.settings.remove(name)
+            FILER.dump()
 
 class Filer:
     '''Abstraction for files and settings'''
@@ -105,13 +115,13 @@ class Filer:
             self.settings = []
             self.dump()
 
-    def add_option(self, name): # не очень это красиво, брат
-        '''this function add tags to settings'''
-        self.change_option(name, add=True)
+#    def add_option(self, name): # не очень это красиво, брат
+#        '''this function add tags to settings'''
+#        self.change_option(name, add=True)
 
-    def remove_option(self, name):
-        '''this function remove tags to settings'''
-        self.change_option(name)
+#    def remove_option(self, name):
+#        '''this function remove tags to settings'''
+#        self.change_option(name)
 
     def dump(self):
         '''this function dumps settings to file'''
@@ -124,16 +134,6 @@ class Filer:
         self.cursor.execute(sql)
         return self.cursor.fetchall()
 
-    def change_option(self, name, add=False):
-        '''need to rewrite it'''
-        print(FILER.settings)
-        if add:# прописать pickle
-            print('adding', name)
-            self.settings.append(name)
-        else:
-            print('removing', name)
-            self.settings.remove(name)
-        self.dump()
 
 FILER = Filer(config.DB_NAME)
 

@@ -18,10 +18,10 @@ def make_flip(item):
         place = 7
     if '*' in item:
         menu_def[1][place][menu_def[1][place].index(item)] = item[1:]
-        walld.remove_option(item[1:])
+        walld.change_option(item[1:])
     else:
         menu_def[1][place][menu_def[1][place].index(item)] = '*' + item
-        walld.add_option(item)
+        walld.change_option(item, add=True)
 
 def restore_settings():
     for i in core.get_settings():
@@ -46,7 +46,7 @@ def tray_start():
             walld.save_image(apath)
 
         elif menu_item == '__ACTIVATED__':
-            walld.spin_dice(99)
+            walld.spin_dice()
 
         elif 'cat_' in menu_item:
             make_flip(menu_item)
@@ -58,7 +58,7 @@ def tray_start():
             tray.Update(menu=menu_def)
 
         elif menu_item == 'spin_dice':
-            walld.spin_dice(99)
+            walld.spin_dice()
 
         elif menu_item == 'Save':
             walld.save_image()
