@@ -15,20 +15,32 @@ def download(url, file_name):
     with open(file_name, "wb") as file:
         response = requests.get(url)
         file.write(response.content)
+    return file_name
+
 
 def set_wall(file_name):
-    mon_list = os.popen('/usr/bin/xfconf-query -c \
-    xfce4-desktop -l | grep "workspace0/last-image"').read().split()
-    for i in mon_list:
-        print(i)
-        os.system('xfconf-query \
-        --channel xfce4-desktop --property '+ i +' --set ' + file_name)
+    de = os.popen("env | grep DESKTOP_SESSION= | awk -F= '{print $2}'").read()
+    print('this is de', de)
+    if de == 'xfce':
+        mon_list = os.popen('/usr/bin/xfconf-query -c \
+        xfce4-desktop -l | grep "workspace0/last-image"').read().split()
+    #print('hi',mon_list)
+        for i in mon_list:
+            os.system('xfconf-query \
+            --channel xfce4-desktop --property '+ i +' --set ' + file_name)
+    elif de == 'mate': #experimental
+        os.system("dconf write \
+        /org/mate/desktop/background/picture-filename \"'PATH-TO-JPEG'\"")
+    elif de == 'gnome':
+        os.system('gsettings set \
+        org.gnome.desktop.background picture-uri file://'+ file_name)
 
 class Walld(object):
     '''this class represents almost all walld functions except trays one'''
     def __init__(self):
         if not os.path.exists(config.MAIN_FOLDER):
-            print("This installation is incorrect! can`t see " + config.MAIN_FOLDER\
+            print("This installation is incorrect! can`t see "
+            + config.MAIN_FOLDER
             + " folder!", file=sys.stderr)
             exit(1)
         print('class walld started!')
@@ -48,8 +60,6 @@ class Walld(object):
         os.system('cp ' + config.MAIN_FOLDER+'/temp.jpg ' + self.save_path)# имя бы достать
         print('saved at ' + self.save_path)
 
-    def guess_de(self):
-        pass#need to guess current de
 
     def get_settings(self):
         return filer.settings
@@ -62,48 +72,30 @@ class Walld(object):
 
     def spin_dice(self, chance):
         list = []
-        for i in range(0, 20):
-            PARAMS = {'auth':config.KEY, "method":"category",'id':'1',
-            'page':i, 'width': '1920',
-            'height':'1080', 'operator':'min'}
-            r = json.loads(requests.get(config.API, params=PARAMS).text)
-            print('getting ', i)
-            if r['success']:
-                if r['wallpapers']:
-                    list += r['wallpapers']
-                else:
-                    print('breaking!')
-                    break
-            else:
-                print('whoops')
-        for i in list:
-            key = random.randint(0, 100)
-            if key >= chance:
-                print('ok, key is ' + str(key) +'\nPrinting out wall')
-                print('downloading', i['url_image'], '...', end = ' ')
-                download(i['url_image'], config.MAIN_FOLDER+'/temp.jpg')
-                print('ok!')#узнать бы как это более централизованно сделать
-                set_wall(config.MAIN_FOLDER+'/temp.jpg')
-                break
-            else:
-                print('pass, key was '+ str(key))
-        else:
-            print('wops!')
+        for i in filer.get_urls('abstract'):# нужно дергать настройки дабы узнать че дергать
+            list.append(i[4])
+        set_wall(download(random.choice(list),config.MAIN_FOLDER+'/temp.jpg'))
 
 class Filer:
     '''Abstraction for files and settings'''
     def __init__(self, db_name):
         self.db_name = db_name
+        if not os.path.exists(config.MAIN_FOLDER):
+            print('creating!' + config.MAIN_FOLDER)
+            os.mkdir(config.MAIN_FOLDER)
         print('filer class is started, checking db!')
-        conn = sqlite3.connect(config.DB_NAME)
-        cursor = conn.cursor()
         try:
-            cursor.execute("SELECT * FROM pics")
+            self.conn = sqlite3.connect(config.DB_NAME)
+            self.cursor = self.conn.cursor()
+            self.cursor.execute("SELECT * FROM pics")
             print('found db!')
         except sqlite3.OperationalError:
             print('need to download db!')
             download(config.DB_URL, config.DB_NAME)
             print('ok!')
+            print('connecting!')
+            self.conn = sqlite3.connect(config.DB_NAME)
+            self.cursor = self.conn.cursor()
         print('checking options!')
         try:
             with open(config.SETTINGS_FILE, 'rb') as file:
@@ -116,6 +108,13 @@ class Filer:
     def dump(self):
         with open(config.SETTINGS_FILE, 'wb') as temp:
             pickle.dump(self.settings, temp)
+
+    def get_urls(self, category):
+        if category == 'abstract':
+            cat = "'Abstract'"
+        self.sql = "SELECT * FROM pics WHERE category='Abstract'"
+        self.cursor.execute(self.sql)
+        return self.cursor.fetchall()
 
     def change_option(self, name, add = False):
         print(filer.settings)
