@@ -6,7 +6,7 @@ import config
 walld = core.Walld()
 
 menu_def = ['BLANK', ['spin_dice', '---', '&Save', 'Save as...', 'Category',core.get_categories(),\
-'Resolution', ['16:9::res_', '16:10::res_', '21:9::res_'], 'E&xit', '!db_test']]
+'Resolution', ['16:9::res_', '16:10::res_', '21:9::res_'], 'E&xit', '!master']]
 
 tray = sg.SystemTray(menu=menu_def, filename=r'temp/kk.x-icon')
 
@@ -47,7 +47,7 @@ def tray_start():
 
         elif menu_item == '__ACTIVATED__':
             walld.spin_dice(99)
-            
+
         elif 'cat_' in menu_item:
             make_flip(menu_item)
             tray.Update(menu=menu_def)

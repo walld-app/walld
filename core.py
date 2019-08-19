@@ -20,19 +20,18 @@ def download(url, file_name):
 
 def set_wall(file_name):
     de = os.popen("env | grep DESKTOP_SESSION= | awk -F= '{print $2}'").read()
-    print('this is de', de)
-    if de == 'xfce':
+    print('this is de' + de)
+    if de == 'xfce\n':
         mon_list = os.popen('/usr/bin/xfconf-query -c \
         xfce4-desktop -l | grep "workspace0/last-image"').read().split()
-    #print('hi',mon_list)
         for i in mon_list:
             os.system('xfconf-query \
             --channel xfce4-desktop --property '+ i +' --set ' + file_name)
-    elif de == 'mate': #experimental
-        os.system("dconf write \
-        /org/mate/desktop/background/picture-filename \"'PATH-TO-JPEG'\"")
-    elif de == 'gnome':
-        os.system('gsettings set \
+    elif de == 'mate\n': #experimental
+        os.system('/usr/bin/gsettings set org.mate.background\
+         picture-filename'+ file_name)
+    elif de == 'gnome\n': #experimental
+        os.system('/usr/bin/gsettings set \
         org.gnome.desktop.background picture-uri file://'+ file_name)
 
 class Walld(object):
@@ -71,10 +70,10 @@ class Walld(object):
         filer.change_option(name)
 
     def spin_dice(self, chance):
-        list = []
+        l = []
         for i in filer.get_urls('abstract'):# нужно дергать настройки дабы узнать че дергать
-            list.append(i[4])
-        set_wall(download(random.choice(list),config.MAIN_FOLDER+'/temp.jpg'))
+            l.append(i[4])
+        set_wall(download(random.choice(l),config.MAIN_FOLDER+'/temp.jpg'))
 
 class Filer:
     '''Abstraction for files and settings'''
@@ -110,8 +109,6 @@ class Filer:
             pickle.dump(self.settings, temp)
 
     def get_urls(self, category):
-        if category == 'abstract':
-            cat = "'Abstract'"
         self.sql = "SELECT * FROM pics WHERE category='Abstract'"
         self.cursor.execute(self.sql)
         return self.cursor.fetchall()

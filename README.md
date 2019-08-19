@@ -5,8 +5,8 @@ Main idea is to grub some fresh and good wallpapers based on your preferences, t
 This script is kind of pre alpha, and if you still wanna use it than
 Please, use branch walld_api(its unavailable for now)
 
-# TODO:
+## TODO:
 making client side more accurate
 
 rewrite it to GTK3+
-# <p align="center">[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a469dc0ce8c341cfa88866c908e7ea41)](https://www.codacy.com/app/loh/walld?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kz159/walld&amp;utm_campaign=Badge_Grade)
+<p align="center">[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a469dc0ce8c341cfa88866c908e7ea41)](https://www.codacy.com/app/loh/walld?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kz159/walld&amp;utm_campaign=Badge_Grade)
