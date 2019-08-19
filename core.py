@@ -1,79 +1,80 @@
-import requests, json, random, os, sys, config, pickle, sqlite3
+'this is the core of walld, all functions should store here'
+import sqlite3
+import json
+import random
+import pickle
+import sys
+import os
+import requests
+import config
 
 def get_categories():
-    list = []
+    '''gets a list of all categorys by api method'''
+    list_categories = []
     params = {'auth':config.KEY, "method":"category_list"}
-    r = json.loads(requests.get(config.API, params=params).text)
-    for i in r['categories']:
+    json_answer = json.loads(requests.get(config.API, params=params).text)
+    for i in json_answer['categories']:
         if i['name'] != 'Abstract':
-            list.append('!' + i['name'] + '::cat_')
+            list_categories.append('!' + i['name'] + '::cat_')
         else:
-            list.append(i['name'] + '::cat_')
-    return list
+            list_categories.append(i['name'] + '::cat_')
+    return list_categories
 
 def download(url, file_name):
+    '''downloads a file, first comes url, second comes full path of file'''
     with open(file_name, "wb") as file:
         response = requests.get(url)
         file.write(response.content)
     return file_name
 
 
-def set_wall(file_name):
-    de = os.popen("env | grep DESKTOP_SESSION= | awk -F= '{print $2}'").read()
-    print('this is de' + de)
-    if de == 'xfce\n':
-        mon_list = os.popen('/usr/bin/xfconf-query -c \
-        xfce4-desktop -l | grep "workspace0/last-image"').read().split()
-        for i in mon_list:
-            os.system('xfconf-query \
-            --channel xfce4-desktop --property '+ i +' --set ' + file_name)
-    elif de == 'mate\n': #experimental
-        os.system('/usr/bin/gsettings set org.mate.background\
-         picture-filename'+ file_name)
-    elif de == 'gnome\n': #experimental
-        os.system('/usr/bin/gsettings set \
-        org.gnome.desktop.background picture-uri file://'+ file_name)
 
-class Walld(object):
+class Walld():
     '''this class represents almost all walld functions except trays one'''
     def __init__(self):
+        self.save_path = config.MAIN_FOLDER+'/saved/' + str(random.random())
+        self.desktop_environment = os.popen("env | grep DESKTOP_SESSION= \
+        | awk -F= '{print $2}'").read()
+
         if not os.path.exists(config.MAIN_FOLDER):
-            print("This installation is incorrect! can`t see "
-            + config.MAIN_FOLDER
-            + " folder!", file=sys.stderr)
+            print("This installation is incorrect! can`t see "\
+            + config.MAIN_FOLDER + " folder!", file=sys.stderr)
             exit(1)
         print('class walld started!')
 
-    def current_image(self, store = False):
-        #сохранить бы в файл если честно
-        if store:
-            self.var = store
+    def save_image(self, name=False):
+        '''copy image to specific(if passed) folder or to standart
+        self.save_path path'''
+        if name:
+            os.system('cp ' + config.MAIN_FOLDER+'/temp.jpg ' + name)
+            print('saved at ' + name)
         else:
-            return self.var
+            os.system('cp ' + config.MAIN_FOLDER+'/temp.jpg ' + self.save_path)# имя бы достать
+            print('saved at ' + self.save_path)
 
-    def save_image(self, name = False):
-        if not name:
-            self.save_path =  config.MAIN_FOLDER+'/saved/' + str(random.random())
-        else:
-            self.save_path = name
-        os.system('cp ' + config.MAIN_FOLDER+'/temp.jpg ' + self.save_path)# имя бы достать
-        print('saved at ' + self.save_path)
+    def spin_dice(self):
+        '''making a list of urls by accessing a db, than sets wall'''
+        list_of_urls = []
+        for i in FILER.get_cells('abstract'):# нужно дергать настройки дабы узнать че дергать
+            list_of_urls.append(i[4])
+        self.set_wall(download(random.choice(list_of_urls),\
+         config.MAIN_FOLDER+'/temp.jpg'))
 
-
-    def get_settings(self):
-        return filer.settings
-
-    def add_option(self, name): # не очень это красиво, брат
-        filer.change_option(name, add = True)
-
-    def remove_option(self, name):
-        filer.change_option(name)
-
-    def spin_dice(self, chance):
-        l = []
-        for i in filer.get_urls('abstract'):# нужно дергать настройки дабы узнать че дергать
-            l.append(i[4])
-        set_wall(download(random.choice(l),config.MAIN_FOLDER+'/temp.jpg'))
+    def set_wall(self, file_name):
+        '''this is critical module, depending on de it sets walls'''
+        print('this is de' + self.desktop_environment)
+        if self.desktop_environment == 'xfce\n':
+            mon_list = os.popen('/usr/bin/xfconf-query -c \
+            xfce4-desktop -l | grep "workspace0/last-image"').read().split()
+            for i in mon_list:
+                os.system('/usr/bin/xfconf-query \
+                --channel xfce4-desktop --property '+ i +' --set ' + file_name)
+        elif self.desktop_environment == 'mate\n': #experimental
+            os.system('/usr/bin/gsettings set org.mate.background\
+            picture-filename'+ file_name)
+        elif self.desktop_environment == 'gnome\n': #experimental
+            os.system('/usr/bin/gsettings set \
+            org.gnome.desktop.background picture-uri file://'+ file_name)
 
 class Filer:
     '''Abstraction for files and settings'''
@@ -104,17 +105,28 @@ class Filer:
             self.settings = []
             self.dump()
 
+    def add_option(self, name): # не очень это красиво, брат
+        '''this function add tags to settings'''
+        self.change_option(name, add=True)
+
+    def remove_option(self, name):
+        '''this function remove tags to settings'''
+        self.change_option(name)
+
     def dump(self):
+        '''this function dumps settings to file'''
         with open(config.SETTINGS_FILE, 'wb') as temp:
             pickle.dump(self.settings, temp)
 
-    def get_urls(self, category):
-        self.sql = "SELECT * FROM pics WHERE category='Abstract'"
-        self.cursor.execute(self.sql)
+    def get_cells(self, category):
+        '''this function get cells by category'''
+        sql = "SELECT * FROM pics WHERE category='{}'".format(category)
+        self.cursor.execute(sql)
         return self.cursor.fetchall()
 
-    def change_option(self, name, add = False):
-        print(filer.settings)
+    def change_option(self, name, add=False):
+        '''need to rewrite it'''
+        print(FILER.settings)
         if add:# прописать pickle
             print('adding', name)
             self.settings.append(name)
@@ -123,4 +135,8 @@ class Filer:
             self.settings.remove(name)
         self.dump()
 
-filer = Filer(config.DB_NAME)
+FILER = Filer(config.DB_NAME)
+
+def get_settings():
+    '''gets list of settings'''
+    return FILER.settings

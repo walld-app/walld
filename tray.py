@@ -24,7 +24,7 @@ def make_flip(item):
         walld.add_option(item)
 
 def restore_settings():
-    for i in walld.get_settings():
+    for i in core.get_settings():
         if '::res_' in i:
             place = 7
         elif '::cat_' in i:
