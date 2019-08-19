@@ -9,4 +9,6 @@ Please, use branch walld_api(its unavailable for now)
 making client side more accurate
 
 rewrite it to GTK3+
-<p align="center">[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a469dc0ce8c341cfa88866c908e7ea41)](https://www.codacy.com/app/loh/walld?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kz159/walld&amp;utm_campaign=Badge_Grade)
+
+
+<p align="center">[![Codacy Badge](https://api.codacy.com/project/badge/Grade/90d2ff08c35946a3b899d82d93a294db)](https://app.codacy.com/app/loh/walld?utm_source=github.com&utm_medium=referral&utm_content=kz159/walld&utm_campaign=Badge_Grade_Settings)
