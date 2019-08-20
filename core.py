@@ -1,5 +1,4 @@
 'this is the core of walld, all functions should store here'
-import sqlite3
 import json
 import random
 import pickle
@@ -8,38 +7,29 @@ import os
 import requests
 import config
 
-def get_categories():
-    '''gets a list of all categories by api method'''
-    list_categories = []
-    params = {'auth':config.KEY, "method":"category_list"}
-    json_answer = json.loads(requests.get(config.API, params=params).text)
-    for i in json_answer['categories']:
-        if i['name'] != 'Abstract':
-            list_categories.append('!' + i['name'] + '::cat_')
-        else:
-            list_categories.append(i['name'] + '::cat_')
-    return list_categories
-
-def download(url, file_name):
-    '''downloads a file, first comes url, second comes full path of file'''
-    with open(file_name, "wb") as file:
-        response = requests.get(url)
-        file.write(response.content)
-    return file_name
-
-
 class Walld():
     '''this class represents almost all walld functions except trays one'''
-    def __init__(self):
+    def __init__(self, api):
+        self.API = api
         self.save_path = config.MAIN_FOLDER+'/saved/' + str(random.random())
         self.desktop_environment = os.popen("env | grep DESKTOP_SESSION= \
         | awk -F= '{print $2}'").read()
-
         if not os.path.exists(config.MAIN_FOLDER):
             print("This installation is incorrect! can`t see "\
             + config.MAIN_FOLDER + " folder!", file=sys.stderr)
             exit(1)
         print('class walld started!')
+
+    def get_categories(self):
+        '''gets a list of all categories by api method'''
+        list_categories = []
+        params = { "param":"categories"}
+        json_answer = json.loads(requests.get(self.API, params=params).text)
+        print(json_answer)
+        for i in json_answer:
+            print(i)
+            list_categories.append(i['category'] + '::cat_')
+        return list_categories
 
     def save_image(self, name=False):
         '''copy image to specific(if passed) folder or to standart
@@ -53,10 +43,8 @@ class Walld():
 
     def spin_dice(self):
         '''making a list of urls by accessing a db, than sets wall'''
-        list_of_urls = []
-        for i in FILER.get_cells('Abstract'):
-            list_of_urls.append(i[4])
-        self.set_wall(download(random.choice(list_of_urls),\
+        self.get_urls('abstract')
+        self.set_wall(FILER.download(self.get_urls('abstract')['url'],\
          config.MAIN_FOLDER+'/temp.jpg'))
 
     def set_wall(self, file_name):
@@ -85,47 +73,35 @@ class Walld():
             print('removing', name)
             FILER.settings.remove(name)
             FILER.dump()
+    def get_urls(self, category):
+        list_urls = []
+        params = {"category":category }
+        json_answer = json.loads(requests.get(self.API + '/walls', params=params).text)
+        if json_answer['success']:
+            return json_answer['content']
+        else:
+            print('something wrong and its on client side')
 
-class Filer:
+class Filer():
     '''Abstraction for files and settings'''
-    def __init__(self, db_name):
-        self.db_name = db_name
-        if not os.path.exists(config.MAIN_FOLDER):
-            print('creating!' + config.MAIN_FOLDER)
-            os.mkdir(config.MAIN_FOLDER)
-        print('filer class is started, checking db!')
-        try:
-            self.conn = sqlite3.connect(config.DB_NAME)
-            self.cursor = self.conn.cursor()
-            self.cursor.execute("SELECT * FROM pics")
-            print('found db!')
-        except sqlite3.OperationalError:
-            print('need to download db!')
-            download(config.DB_URL, config.DB_NAME)
-            print('ok!')
-            print('connecting!')
-            self.conn = sqlite3.connect(config.DB_NAME)
-            self.cursor = self.conn.cursor()
+    def __init__(self, main_folder):
+        self.main_folder = main_folder
+        self.settings_file = self.main_folder + '/settings.conf'
+        if not os.path.exists(self.main_folder):
+            print('creating!' + self.main_folder)
+            os.mkdir(self.main_folder)
         print('checking options!')
         try:
-            with open(config.SETTINGS_FILE, 'rb') as file:
+            with open(self.settings_file, 'rb') as file:
                 self.settings = pickle.load(file)
         except FileNotFoundError:
             print('file not found! creating new one')
             self.settings = []
             self.dump()
 
-#    def add_option(self, name): # не очень это красиво, брат
-#        '''this function add tags to settings'''
-#        self.change_option(name, add=True)
-
-#    def remove_option(self, name):
-#        '''this function remove tags to settings'''
-#        self.change_option(name)
-
     def dump(self):
         '''this function dumps settings to file'''
-        with open(config.SETTINGS_FILE, 'wb') as temp:
+        with open(self.settings_file, 'wb') as temp:
             pickle.dump(self.settings, temp)
 
     def get_cells(self, category):
@@ -134,8 +110,17 @@ class Filer:
         self.cursor.execute(sql)
         return self.cursor.fetchall()
 
+    def download(self, url, file_name=None):
+        '''downloads a file, first comes url, second comes full path of file'''
+        if file_name:
+            with open(file_name, "wb") as file:
+                response = requests.get(url)
+                file.write(response.content)
+                return file_name
+        else:
+            pass
 
-FILER = Filer(config.DB_NAME)
+FILER = Filer(config.MAIN_FOLDER)
 
 def get_settings():
     '''gets list of settings'''
