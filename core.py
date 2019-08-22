@@ -1,7 +1,6 @@
 'this is the core of walld, all functions should store here'
 import json
 import random
-import sys
 import os
 import requests
 import config
@@ -16,7 +15,7 @@ class Walld():
         | awk -F= '{print $2}'").read()
         if not os.path.exists(config.MAIN_FOLDER):
             print("This installation is incorrect! can`t see "\
-            + config.MAIN_FOLDER + " folder!", file=sys.stderr)
+            + config.MAIN_FOLDER + " folder!")
             exit(1)
         print('class walld started!')
 
