@@ -30,7 +30,7 @@ class Walld():
         json_answer = json.loads(requests.get(self.api, params=params).text)
         print(json_answer)
         for i in json_answer:
-            print(i)
+            print('category from server:',i)
             list_categories.append(i['category'] + '::cat_')
         return list_categories
 
@@ -46,8 +46,7 @@ class Walld():
 
     def spin_dice(self):
         '''making a list of urls by accessing a db, than sets wall'''
-        self.get_urls('abstract')
-        self.set_wall(download(self.get_urls('abstract')['url'],\
+        self.set_wall(download(self.get_urls()['url'],\
          config.MAIN_FOLDER+'/temp.jpg'))
 
     def set_wall(self, file_name):
@@ -71,10 +70,15 @@ class Walld():
         print(self.filer.settings)
         self.filer.change_option(name, add)
 
-    def get_urls(self, category):
+    def get_urls(self):
         '''requests new link for wallpaper'''
-        params = {"category":category}
-        json_answer = json.loads(requests.get(self.api + '/walls', params=params).text)
+        params = []
+        print(self.filer.settings['categories'])
+        for i in self.filer.settings['categories']:
+            print('this', i[:-6])
+            params.append(("category", i[:-6]))
+        json_answer = json.loads(requests.get(self.api\
+         + '/walls', params=params).text)
         if json_answer['success']:
             result = json_answer['content']
         else:
@@ -95,7 +99,7 @@ class Filer():
                 self.settings = json.load(file)
         except FileNotFoundError:
             print('file not found! creating new one')
-            self.settings = []
+            self.settings = {'categories':[], 'resolutions':[]}
             self.dump()
 
     def change_option(self, name, add=False):
@@ -103,11 +107,17 @@ class Filer():
         print(self.settings)
         if add:
             print('adding', name)
-            self.settings.append(name)
+            if 'cat_' in name:
+                self.settings['categories'].append(name)
+            elif 'res_' in name:
+                self.settings['resolutions'].append(name)
             self.dump()
         else:
             print('removing', name)
-            self.settings.remove(name)
+            if 'cat_' in name:
+                self.settings['categories'].remove(name)
+            elif 'res_' in name:
+                self.settings['resolutions'].remove(name)
             self.dump()
 
     def dump(self):

@@ -24,13 +24,11 @@ def make_flip(item):
         walld.change_option(item, add=True)
 
 def restore_settings():
-    for i in walld.get_settings():
-        if '::res_' in i:
-            place = 7
-        elif '::cat_' in i:
-            place = 5
-        print(i)
-        menu_def[1][place][menu_def[1][place].index(i)] = "*" + i
+    print('walld settings:', walld.get_settings())
+    for i in walld.get_settings()['categories']:
+        menu_def[1][5][menu_def[1][5].index(i)] = "*" + i
+    for i in walld.get_settings()['resolutions']:
+        menu_def[1][7][menu_def[1][7].index(i)] = "*" + i
     tray.Update(menu=menu_def)
 
 def tray_start():
