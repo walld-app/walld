@@ -1,7 +1,6 @@
 'this is the core of walld, all functions should store here'
 import json
 import random
-import pickle
 import sys
 import os
 import requests
@@ -49,7 +48,7 @@ class Walld():
     def spin_dice(self):
         '''making a list of urls by accessing a db, than sets wall'''
         self.get_urls('abstract')
-        self.set_wall(self.filer.download(self.get_urls('abstract')['url'],\
+        self.set_wall(download(self.get_urls('abstract')['url'],\
          config.MAIN_FOLDER+'/temp.jpg'))
 
     def set_wall(self, file_name):
@@ -71,13 +70,8 @@ class Walld():
     def change_option(self, name, add=False):
         '''need to rewrite it'''
         print(self.filer.settings)
-        if add:
-            print('adding', name)
-            self.filer.settings.append(name)
-        else:
-            print('removing', name)
-            self.filer.settings.remove(name)
-            self.filer.dump()
+        self.filer.change_option(name, add)
+
     def get_urls(self, category):
         '''requests new link for wallpaper'''
         params = {"category":category}
@@ -92,30 +86,39 @@ class Filer():
     '''Abstraction for files and settings'''
     def __init__(self, main_folder):
         self.main_folder = main_folder
-        self.settings_file = self.main_folder + '/settings.conf'
+        self.settings_file = self.main_folder + '/prefs.json'
         if not os.path.exists(self.main_folder):
             print('creating!' + self.main_folder)
             os.mkdir(self.main_folder)
         print('checking options!')
         try:
-            with open(self.settings_file, 'rb') as file:
-                self.settings = pickle.load(file)
+            with open(self.settings_file, 'r') as file:
+                self.settings = json.load(file)
         except FileNotFoundError:
             print('file not found! creating new one')
             self.settings = []
             self.dump()
 
+    def change_option(self, name, add=False):
+        '''works with options file'''
+        print(self.settings)
+        if add:
+            print('adding', name)
+            self.settings.append(name)
+            self.dump()
+        else:
+            print('removing', name)
+            self.settings.remove(name)
+            self.dump()
+
     def dump(self):
         '''this function dumps settings to file'''
-        with open(self.settings_file, 'wb') as temp:
-            pickle.dump(self.settings, temp)
+        with open(self.settings_file, 'w') as temp:
+            json.dump(self.settings, temp)
 
-    def download(self, url, file_name=None):
-        '''downloads a file, first comes url, second comes full path of file'''
-        if file_name:
-            with open(file_name, "wb") as file:
-                response = requests.get(url)
-                file.write(response.content)
-            return file_name
-        else:
-            return None
+def download(url, file_name):
+    '''downloads a file, first comes url, second comes full path of file'''
+    with open(file_name, "wb") as file:
+        response = requests.get(url)
+        file.write(response.content)
+    return file_name
