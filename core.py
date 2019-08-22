@@ -10,7 +10,8 @@ import config
 class Walld():
     '''this class represents almost all walld functions except trays one'''
     def __init__(self, api):
-        self.API = api
+        self.filer = Filer(config.MAIN_FOLDER)
+        self.api = api
         self.save_path = config.MAIN_FOLDER+'/saved/' + str(random.random())
         self.desktop_environment = os.popen("env | grep DESKTOP_SESSION= \
         | awk -F= '{print $2}'").read()
@@ -20,11 +21,15 @@ class Walld():
             exit(1)
         print('class walld started!')
 
+    def get_settings(self):
+        '''gets list of settings'''
+        return self.filer.settings
+
     def get_categories(self):
         '''gets a list of all categories by api method'''
         list_categories = []
-        params = { "param":"categories"}
-        json_answer = json.loads(requests.get(self.API, params=params).text)
+        params = {"param":"categories"}
+        json_answer = json.loads(requests.get(self.api, params=params).text)
         print(json_answer)
         for i in json_answer:
             print(i)
@@ -44,7 +49,7 @@ class Walld():
     def spin_dice(self):
         '''making a list of urls by accessing a db, than sets wall'''
         self.get_urls('abstract')
-        self.set_wall(FILER.download(self.get_urls('abstract')['url'],\
+        self.set_wall(self.filer.download(self.get_urls('abstract')['url'],\
          config.MAIN_FOLDER+'/temp.jpg'))
 
     def set_wall(self, file_name):
@@ -65,22 +70,23 @@ class Walld():
 
     def change_option(self, name, add=False):
         '''need to rewrite it'''
-        print(FILER.settings)
+        print(self.filer.settings)
         if add:
             print('adding', name)
-            FILER.settings.append(name)
+            self.filer.settings.append(name)
         else:
             print('removing', name)
-            FILER.settings.remove(name)
-            FILER.dump()
+            self.filer.settings.remove(name)
+            self.filer.dump()
     def get_urls(self, category):
-        list_urls = []
-        params = {"category":category }
-        json_answer = json.loads(requests.get(self.API + '/walls', params=params).text)
+        '''requests new link for wallpaper'''
+        params = {"category":category}
+        json_answer = json.loads(requests.get(self.api + '/walls', params=params).text)
         if json_answer['success']:
-            return json_answer['content']
+            result = json_answer['content']
         else:
             print('something wrong and its on client side')
+        return result
 
 class Filer():
     '''Abstraction for files and settings'''
@@ -104,24 +110,12 @@ class Filer():
         with open(self.settings_file, 'wb') as temp:
             pickle.dump(self.settings, temp)
 
-    def get_cells(self, category):
-        '''this function get cells by category'''
-        sql = "SELECT * FROM pics WHERE category='{}'".format(category)
-        self.cursor.execute(sql)
-        return self.cursor.fetchall()
-
     def download(self, url, file_name=None):
         '''downloads a file, first comes url, second comes full path of file'''
         if file_name:
             with open(file_name, "wb") as file:
                 response = requests.get(url)
                 file.write(response.content)
-                return file_name
+            return file_name
         else:
-            pass
-
-FILER = Filer(config.MAIN_FOLDER)
-
-def get_settings():
-    '''gets list of settings'''
-    return FILER.settings
+            return None
