@@ -2,6 +2,7 @@
 import json
 import random
 import os
+import subprocess
 import requests
 import config
 
@@ -11,6 +12,7 @@ class Walld():
         self.filer = Filer(config.MAIN_FOLDER)
         self.api = api
         self.save_path = config.MAIN_FOLDER+'/saved/' + str(random.random())
+        self.cp =
         self.desktop_environment = os.popen("env | grep DESKTOP_SESSION= \
         | awk -F= '{print $2}'").read()
         if not os.path.exists(config.MAIN_FOLDER):
@@ -28,9 +30,7 @@ class Walld():
         list_categories = []
         params = {"param":"categories"}
         json_answer = json.loads(requests.get(self.api, params=params).text)
-        print(json_answer)
         for i in json_answer:
-            print('category from server:',i)
             list_categories.append(i['category'] + '::cat_')
         return list_categories
 
@@ -38,10 +38,10 @@ class Walld():
         '''copy image to specific(if passed) folder or to standart
         self.save_path path'''
         if name:
-            os.system('cp ' + config.MAIN_FOLDER+'/temp.jpg ' + name)
+            subprocess.call(['/usr/bin/cp ', config.MAIN_FOLDER+'/temp.jpg ', name], shell=False)
             print('saved at ' + name)
         else:
-            os.system('cp ' + config.MAIN_FOLDER+'/temp.jpg ' + self.save_path)
+            subprocess.call(['/usr/bin/cp ', config.MAIN_FOLDER+'/temp.jpg ', self.save_path], shell=False)
             print('saved at ' + self.save_path)
 
     def spin_dice(self):
@@ -51,7 +51,6 @@ class Walld():
 
     def set_wall(self, file_name):
         '''this is critical module, depending on de it sets walls'''
-        print('this is de' + self.desktop_environment)
         if self.desktop_environment == 'xfce\n':
             mon_list = os.popen('/usr/bin/xfconf-query -c \
             xfce4-desktop -l | grep "workspace0/last-image"').read().split()
@@ -67,15 +66,12 @@ class Walld():
 
     def change_option(self, name, add=False):
         '''need to rewrite it'''
-        print(self.filer.settings)
         self.filer.change_option(name, add)
 
     def get_urls(self):
         '''requests new link for wallpaper'''
         params = []
-        print(self.filer.settings['categories'])
         for i in self.filer.settings['categories']:
-            print('this', i[:-6])
             params.append(("category", i[:-6]))
         json_answer = json.loads(requests.get(self.api\
          + '/walls', params=params).text)
@@ -104,7 +100,6 @@ class Filer():
 
     def change_option(self, name, add=False):
         '''works with options file'''
-        print(self.settings)
         if add:
             print('adding', name)
             if 'cat_' in name:

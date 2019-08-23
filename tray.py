@@ -24,7 +24,6 @@ def make_flip(item):
         walld.change_option(item, add=True)
 
 def restore_settings():
-    print('walld settings:', walld.get_settings())
     for i in walld.get_settings()['categories']:
         menu_def[1][5][menu_def[1][5].index(i)] = "*" + i
     for i in walld.get_settings()['resolutions']:
@@ -35,7 +34,6 @@ def tray_start():
     restore_settings()
     while True:  # The event loop
         menu_item = tray.Read()
-        print(menu_item)
         if menu_item == 'Exit':
             break
 
