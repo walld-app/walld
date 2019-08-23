@@ -3,7 +3,7 @@ import PySimpleGUIQt as sg
 import core
 import config
 
-walld = core.Walld(config.API)
+walld = core.Walld(config.API, config.MAIN_FOLDER)
 
 menu_def = ['BLANK', ['spin_dice', '---', '&Save', 'Save as...', 'Category',walld.get_categories(),\
 'Resolution', ['16:9::res_', '16:10::res_', '21:9::res_'], 'E&xit', '!master']]

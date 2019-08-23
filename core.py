@@ -2,21 +2,24 @@
 import json
 import random
 import os
-import subprocess
+import subprocess #nosec
 import requests
-import config
 
 class Walld():
     '''this class represents almost all walld functions except trays one'''
-    def __init__(self, api):
-        self.filer = Filer(config.MAIN_FOLDER)
+    def __init__(self, api, main_folder):
+        self.main_folder = main_folder
+        self.filer = Filer(self.main_folder)
         self.api = api
-        self.save_path = config.MAIN_FOLDER+'/saved/' + str(random.random())
-        self.desktop_environment = os.popen("env | grep DESKTOP_SESSION= \
-        | awk -F= '{print $2}'").read()
-        if not os.path.exists(config.MAIN_FOLDER):
-            print("This installation is incorrect! can`t see "\
-            + config.MAIN_FOLDER + " folder!")
+        self.save_path = self.main_folder+'/saved/' + str(random.random())#nosec
+        code = "/usr/bin/env | /usr/bin/grep DESKTOP_SESSION= \
+        | /usr/bin/awk -F= '{print $2}'"
+        self.desktop_environment = \
+        subprocess.check_output(code, shell=True).decode('ascii')
+        print('de is', self.desktop_environment)
+        if not os.path.exists(self.main_folder):
+            print("can`t see "\
+            + self.main_folder + " folder!")
             exit(1)
         print('class walld started!')
 
@@ -37,31 +40,35 @@ class Walld():
         '''copy image to specific(if passed) folder or to standart
         self.save_path path'''
         if name:
-            subprocess.call(['/usr/bin/cp ', config.MAIN_FOLDER+'/temp.jpg ', name], shell=False)
+            subprocess.run(['/usr/bin/cp', self.main_folder+'/temp.jpg', name]\
+            , shell=False)#nosec
             print('saved at ' + name)
         else:
-            subprocess.call(['/usr/bin/cp ', config.MAIN_FOLDER+'/temp.jpg ', self.save_path], shell=False)
+            subprocess.run(['/usr/bin/cp', self.main_folder+'/temp.jpg',\
+             self.save_path], shell=False)
             print('saved at ' + self.save_path)
 
     def spin_dice(self):
         '''making a list of urls by accessing a db, than sets wall'''
         self.set_wall(download(self.get_urls()['url'],\
-         config.MAIN_FOLDER+'/temp.jpg'))
+         self.main_folder+'/temp.jpg'))
 
     def set_wall(self, file_name):
         '''this is critical module, depending on de it sets walls'''
         if self.desktop_environment == 'xfce\n':
-            mon_list = os.popen('/usr/bin/xfconf-query -c \
-            xfce4-desktop -l | grep "workspace0/last-image"').read().split()
+            mon_list = subprocess.check_output('/usr/bin/xfconf-query -c \
+xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()
+            print(mon_list)
             for i in mon_list:
-                os.system('/usr/bin/xfconf-query \
-                --channel xfce4-desktop --property '+ i +' --set ' + file_name)
+                print('here comes')
+                subprocess.call(['/usr/bin/xfconf-query',\
+'--channel', 'xfce4-desktop', '--property', i, '--set', file_name])
         elif self.desktop_environment == 'mate\n': #experimental
-            os.system('/usr/bin/gsettings set org.mate.background\
-            picture-filename'+ file_name)
+            subprocess.run(['/usr/bin/gsettings', 'set',\
+ 'org.mate.background', 'picture-filename', file_name])
         elif self.desktop_environment == 'gnome\n': #experimental
-            os.system('/usr/bin/gsettings set \
-            org.gnome.desktop.background picture-uri file://'+ file_name)
+            subprocess.run(['/usr/bin/gsettings', 'set',\
+'org.gnome.desktop.background', 'picture-uri file://', file_name])
 
     def change_option(self, name, add=False):
         '''need to rewrite it'''
