@@ -12,7 +12,6 @@ class Walld():
         self.filer = Filer(config.MAIN_FOLDER)
         self.api = api
         self.save_path = config.MAIN_FOLDER+'/saved/' + str(random.random())
-        self.cp =
         self.desktop_environment = os.popen("env | grep DESKTOP_SESSION= \
         | awk -F= '{print $2}'").read()
         if not os.path.exists(config.MAIN_FOLDER):
