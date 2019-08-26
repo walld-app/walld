@@ -48,7 +48,6 @@ def tray_start():
             make_flip(menu_item)
             tray.Update(menu=menu_def)
         #ТУТ НУЖЕН ЦИКЛ FOR ДЛЯ ПРОШЕРСТЕНИЯ ВСЕХ ЛИСТОВ
-            pass
         elif 'res_' in menu_item:
             make_flip(menu_item)
             tray.Update(menu=menu_def)

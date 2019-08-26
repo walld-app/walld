@@ -15,7 +15,7 @@ class Walld():
         code = "/usr/bin/env | /usr/bin/grep DESKTOP_SESSION= \
         | /usr/bin/awk -F= '{print $2}'"
         self.desktop_environment = \
-        subprocess.check_output(code, shell=True).decode('ascii')
+        subprocess.check_output(code, shell=True).decode('ascii')#nosec, redo
         print('de is', self.desktop_environment)
         if not os.path.exists(self.main_folder):
             print("can`t see "\
@@ -45,7 +45,7 @@ class Walld():
             print('saved at ' + name)
         else:
             subprocess.run(['/usr/bin/cp', self.main_folder+'/temp.jpg',\
-             self.save_path], shell=False)
+             self.save_path], shell=False)#nosec wont fix
             print('saved at ' + self.save_path)
 
     def spin_dice(self):
@@ -57,18 +57,18 @@ class Walld():
         '''this is critical module, depending on de it sets walls'''
         if self.desktop_environment == 'xfce\n':
             mon_list = subprocess.check_output('/usr/bin/xfconf-query -c \
-xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()
+xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()#nosec, rewrite
             print(mon_list)
             for i in mon_list:
                 print('here comes')
-                subprocess.call(['/usr/bin/xfconf-query',\
+                subprocess.call(['/usr/bin/xfconf-query',#nosec wont fix
 '--channel', 'xfce4-desktop', '--property', i, '--set', file_name])
         elif self.desktop_environment == 'mate\n': #experimental
-            subprocess.run(['/usr/bin/gsettings', 'set',\
+            subprocess.run(['/usr/bin/gsettings', 'set',#nosec wont fix
  'org.mate.background', 'picture-filename', file_name])
         elif self.desktop_environment == 'gnome\n': #experimental
-            subprocess.run(['/usr/bin/gsettings', 'set',\
-'org.gnome.desktop.background', 'picture-uri file://', file_name])
+            subprocess.run(['/usr/bin/gsettings', 'set',#nosec wont fix
+'org.gnome.desktop.background', 'picture-uri file://', file_name])#nosec wont fix
 
     def change_option(self, name, add=False):
         '''need to rewrite it'''
@@ -79,12 +79,16 @@ xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()
         params = []
         for i in self.filer.settings['categories']:
             params.append(("category", i[:-6]))
+        if not params:
+            params = [('random', '1')]
         json_answer = json.loads(requests.get(self.api\
          + '/walls', params=params).text)
         if json_answer['success']:
+            print(params)
             result = json_answer['content']
         else:
             print('something wrong and its on client side')
+            print('here the params', params)
         return result
 
 class Filer():
