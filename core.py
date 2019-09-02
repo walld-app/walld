@@ -12,10 +12,13 @@ class Walld():
         self.filer = Filer(self.main_folder)
         self.api = api
         self.save_path = self.main_folder+'/saved/' + str(random.random())#nosec
-        code = "/usr/bin/env | /usr/bin/grep DESKTOP_SESSION= \
-        | /usr/bin/awk -F= '{print $2}'"
-        self.desktop_environment = \
-        subprocess.check_output(code, shell=True).decode('ascii')#nosec, redo
+        if os.name == 'nt':
+            self.desktop_environment = 'Windows'
+        else:
+            code = "/usr/bin/env | /usr/bin/grep DESKTOP_SESSION= \
+            | /usr/bin/awk -F= '{print $2}'"
+            self.desktop_environment = \
+            subprocess.check_output(code, shell=True).decode('ascii')#nosec, redo
         print('de is', self.desktop_environment)
         if not os.path.exists(self.main_folder):
             print("can`t see "\
@@ -69,6 +72,8 @@ xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()#nosec, rew
         elif self.desktop_environment == 'gnome\n': #experimental
             subprocess.run(['/usr/bin/gsettings', 'set',#nosec wont fix
 'org.gnome.desktop.background', 'picture-uri file://', file_name])#nosec wont fix
+        elif self.desktop_environment == 'Windows':
+            print('there`s need to make powershell script')
 
     def change_option(self, name, add=False):
         '''need to rewrite it'''
