@@ -1,5 +1,5 @@
 #!/bin/python3
-import PySimpleGUIQt as sg
+import PySimpleGUIQt as sg # сука, уже не катит
 import core
 import config
 
@@ -8,20 +8,24 @@ walld = core.Walld(config.API, config.MAIN_FOLDER)
 menu_def = ['BLANK', ['spin_dice', '---', '&Save', 'Save as...', 'Category',walld.get_categories(),\
 'Resolution', ['16:9::res_', '16:10::res_', '21:9::res_'], 'E&xit', '!master']]
 
+print(menu_def)
 tray = sg.SystemTray(menu=menu_def, filename=r'temp/kk.x-icon')
 
-def make_flip(item):
+def make_flip(item): #что если сразу лезть в файл настроек и там все менять? далее вызывать tray_update()
     if "cat_" in item:
         print('cat in item')
         place = 5
     elif "res_" in item:
         place = 7
+    elif "sca_" in item:
+        place =  6
     if '*' in item:
         menu_def[1][place][menu_def[1][place].index(item)] = item[1:]
         walld.change_option(item[1:])
     else:
         menu_def[1][place][menu_def[1][place].index(item)] = '*' + item
         walld.change_option(item, add=True)
+    tray.Update(menu=menu_def)
 
 def restore_settings():
     for i in walld.get_settings()['categories']:
@@ -46,12 +50,14 @@ def tray_start():
 
         elif 'cat_' in menu_item:
             make_flip(menu_item)
-            tray.Update(menu=menu_def)
+            
         #ТУТ НУЖЕН ЦИКЛ FOR ДЛЯ ПРОШЕРСТЕНИЯ ВСЕХ ЛИСТОВ
         elif 'res_' in menu_item:
             make_flip(menu_item)
-            tray.Update(menu=menu_def)
-
+            
+        elif 'sca_' in menu_item:
+            make_flip(menu_item)
+           
         elif menu_item == 'spin_dice':
             walld.spin_dice()
 

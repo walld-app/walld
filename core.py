@@ -32,12 +32,14 @@ class Walld():
 
     def get_categories(self):
         '''gets a list of all categories by api method'''
-        list_categories = []
+        list_categories = {}
         params = {"param":"categories"}
         json_answer = json.loads(requests.get(self.api, params=params).text)
-        for i in json_answer:
-            list_categories.append(i['category'] + '::cat_')
-        return list_categories
+        ong = []
+        for i in json_answer['content']:
+            ong.append(i['category']+'::cat_')
+            ong.append([l+'::sca_' for l in i['subs']])
+        return ong
 
     def save_image(self, name=False):
         '''copy image to specific(if passed) folder or to standart
@@ -83,6 +85,7 @@ xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()#nosec, rew
         '''requests new link for wallpaper'''
         params = []
         for i in self.filer.settings['categories']:
+            print(i)
             params.append(("category", i[:-6]))
         if not params:
             params = [('random', '1')]
@@ -141,3 +144,7 @@ def download(url, file_name):
         response = requests.get(url)
         file.write(response.content)
     return file_name
+
+
+#структура файла настроек должна быть такой:
+#{"categories": {abstract:[lava, omg], culture:[nigga, nigga2]}, "resolutions": ["16:10::res_"]}
