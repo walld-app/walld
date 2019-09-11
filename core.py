@@ -73,7 +73,7 @@ xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()#nosec, rew
         for i in self.filer.settings['categories']:
             print(i)
             print(i.split('::')[0])
-            params.append(("category", i.split('::')[0])) # не использовать -6 сделать циклом for с break #готово
+            params.append(("category", i.split('::')[0]))
         if not params:
             params = [('random', '1')]
         json_answer = json.loads(requests.get(self.api\
@@ -126,7 +126,6 @@ class Filer():
             if 'res_' in name:
                 self.settings['resolutions'].append(name)
             elif 'sca_' in name:
-                ll = [name.split('::')[2]]
                 if not name.split('::')[2] in self.settings['categories']:
                     self.settings['categories'][name.split('::')[2]]= []
                 self.settings['categories'][name.split('::')[2]].append(name.split('::')[0])
@@ -134,9 +133,14 @@ class Filer():
         else:
             print('removing', name)
             if 'cat_' in name:
-                self.settings['categories'].remove(name)
+                self.settings['categories'].remove(name[1:])
             elif 'res_' in name:
                 self.settings['resolutions'].remove(name[1:])
+            elif 'sca_' in name:
+                lst = name.split("::")
+                nn = lst[0][1:]
+                #print(self.settings['resolutions'][lst[2]])
+                self.settings['categories'][lst[2]].remove(lst[0][1:])
             self.dump()
 
     def dump(self):
@@ -150,7 +154,3 @@ def download(url, file_name):
         response = requests.get(url)
         file.write(response.content)
     return file_name
-
-
-#структура файла настроек должна быть такой:
-#{"categories": {abstract:[lava, omg], culture:[nigga, nigga2]}, "resolutions": ["16:10::res_"]}
