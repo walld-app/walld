@@ -65,7 +65,7 @@ def tray_start():
             walld.save_image(apath)
 
         elif menu_item == '__ACTIVATED__':
-            walld.spin_dice('ll')
+            walld.spin_dice()
 
         elif ('cat_' in menu_item or 'res_' in menu_item or 'sca_' in menu_item) :
             print('aha')
@@ -74,7 +74,7 @@ def tray_start():
         #ТУТ НУЖЕН ЦИКЛ FOR ДЛЯ ПРОШЕРСТЕНИЯ ВСЕХ ЛИСТОВ
            
         elif menu_item == 'spin_dice':
-            walld.spin_dice('ll')
+            walld.spin_dice()
 
         elif menu_item == 'Save':
             walld.save_image()

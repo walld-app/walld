@@ -38,11 +38,10 @@ class Walld():
              self.save_path], shell=False)#nosec wont fix
             print('saved at ' + self.save_path)
 
-    def spin_dice(self, some):
-        print(self, some)
+    def spin_dice(self):
         '''making a list of urls by accessing a db, than sets wall'''
         self.set_wall(download(self.get_urls()['url'],\
-         self.main_folder+'/temp.jpg'))
+        self.main_folder+'/temp.jpg'))
 
     def set_wall(self, file_name):
         '''this is critical module, depending on de it sets walls'''
@@ -70,10 +69,12 @@ xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()#nosec, rew
     def get_urls(self):
         '''requests new link for wallpaper'''
         params = []
-        for i in self.filer.settings['categories']:
-            print(i)
-            print(i.split('::')[0])
-            params.append(("category", i.split('::')[0]))
+        if self.filer.settings['categories']:
+            print(self.filer.settings['categories'])
+            cat = random.choice(list(self.filer.settings['categories'].keys()))
+            sub_cat = random.choice(self.filer.settings['categories'][cat])
+            params.append(("category", cat))
+            params.append(('sub_category', sub_cat))
         if not params:
             params = [('random', '1')]
         json_answer = json.loads(requests.get(self.api\
@@ -138,8 +139,6 @@ class Filer():
                 self.settings['resolutions'].remove(name[1:])
             elif 'sca_' in name:
                 lst = name.split("::")
-                nn = lst[0][1:]
-                #print(self.settings['resolutions'][lst[2]])
                 self.settings['categories'][lst[2]].remove(lst[0][1:])
             self.dump()
 
