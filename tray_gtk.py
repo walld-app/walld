@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 import core
 import gi
+import config
 gi.require_version('Gtk', '3.0')
 
 from gi.repository import Gtk
 
-walld = core.Walld()
+walld = core.Walld(config.API, config.MAIN_FOLDER)
 
 class TrayIcon(Gtk.StatusIcon):
     def __init__(self):
@@ -18,15 +19,15 @@ class TrayIcon(Gtk.StatusIcon):
         submenu = Gtk.Menu()
 
         menu_item1 = Gtk.MenuItem(label = "First Entry", submenu= submenu)
-        menu.append(menu_item1)
-        #menu_item1.connect("activate", print, 'll')
+        mi3 = Gtk.MenuItem(label = "spin_dice")
+        mi3.connect('activate', walld.spin_dice)
 
         menu_item2 = Gtk.MenuItem(label = "Quit")
+        menu_item2.connect('activate', Gtk.main_quit)
+        menu.append(mi3)
+        menu.append(menu_item1)
         submenu.append(menu_item2)
-        menu_item2.connect("activate", Gtk.main_quit)
 
-        submenu.show_all()
-        submenu.popup(None, None, None, self, 3, time)
         menu.show_all()
         menu.popup(None, None, None, self, 4, time)
 

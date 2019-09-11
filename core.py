@@ -26,21 +26,6 @@ class Walld():
             exit(1)
         print('class walld started!')
 
-    def get_settings(self):
-        '''gets list of settings'''
-        return self.filer.settings
-
-    def get_categories(self):
-        '''gets a list of all categories by api method'''
-        list_categories = {}
-        params = {"param":"categories"}
-        json_answer = json.loads(requests.get(self.api, params=params).text)
-        ong = []
-        for i in json_answer['content']:
-            ong.append(i['category']+'::cat_')
-            ong.append([l+'::sca_' for l in i['subs']])
-        return ong
-
     def save_image(self, name=False):
         '''copy image to specific(if passed) folder or to standart
         self.save_path path'''
@@ -53,7 +38,8 @@ class Walld():
              self.save_path], shell=False)#nosec wont fix
             print('saved at ' + self.save_path)
 
-    def spin_dice(self):
+    def spin_dice(self, some):
+        print(self, some)
         '''making a list of urls by accessing a db, than sets wall'''
         self.set_wall(download(self.get_urls()['url'],\
          self.main_folder+'/temp.jpg'))
@@ -86,7 +72,8 @@ xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()#nosec, rew
         params = []
         for i in self.filer.settings['categories']:
             print(i)
-            params.append(("category", i[:-6]))
+            print(i.split('::')[0])
+            params.append(("category", i.split('::')[0])) # не использовать -6 сделать циклом for с break #готово
         if not params:
             params = [('random', '1')]
         json_answer = json.loads(requests.get(self.api\
@@ -98,6 +85,20 @@ xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()#nosec, rew
             print('something wrong and its on client side')
             print('here the params', params)
         return result
+
+    def get_settings(self):
+        '''gets list of settings'''
+        return self.filer.settings
+
+    def get_categories(self):
+        '''gets a list of all categories by api method'''
+        params = {"param":"categories"}
+        json_answer = json.loads(requests.get(self.api, params=params).text)
+        ong = []
+        for i in json_answer['content']:
+            ong.append(i['category']+'::cat_')
+            ong.append([l+'::sca_::'+ i['category']  for l in i['subs']])
+        return ong
 
 class Filer():
     '''Abstraction for files and settings'''
@@ -113,24 +114,29 @@ class Filer():
                 self.settings = json.load(file)
         except FileNotFoundError:
             print('file not found! creating new one')
-            self.settings = {'categories':[], 'resolutions':[]}
+            self.settings = {'categories':{}, 'resolutions':[]}
             self.dump()
 
     def change_option(self, name, add=False):
         '''works with options file'''
         if add:
             print('adding', name)
-            if 'cat_' in name:
-                self.settings['categories'].append(name)
-            elif 'res_' in name:
+            #if 'cat_' in name:
+            #    self.settings['categories'][name] = {}
+            if 'res_' in name:
                 self.settings['resolutions'].append(name)
+            elif 'sca_' in name:
+                ll = [name.split('::')[2]]
+                if not name.split('::')[2] in self.settings['categories']:
+                    self.settings['categories'][name.split('::')[2]]= []
+                self.settings['categories'][name.split('::')[2]].append(name.split('::')[0])
             self.dump()
         else:
             print('removing', name)
             if 'cat_' in name:
                 self.settings['categories'].remove(name)
             elif 'res_' in name:
-                self.settings['resolutions'].remove(name)
+                self.settings['resolutions'].remove(name[1:])
             self.dump()
 
     def dump(self):
