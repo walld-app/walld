@@ -8,7 +8,6 @@ walld = core.Walld(config.API, config.MAIN_FOLDER)
 menu_def = ['BLANK', ['spin_dice', '---', '&Save', 'Save as...', 'Category',walld.get_categories(),\
 'Resolution', ['16:9::res_', '16:10::res_', '21:9::res_'], 'E&xit', '!master']]
 
-print(menu_def)
 tray = sg.SystemTray(menu=menu_def)
 
 def make_flip(item): #что если сразу лезть в файл настроек и там все менять? далее вызывать tray_update()

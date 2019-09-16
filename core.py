@@ -40,8 +40,12 @@ class Walld():
 
     def spin_dice(self):
         '''making a list of urls by accessing a db, than sets wall'''
-        self.set_wall(download(self.get_urls()['url'],\
-        self.main_folder+'/temp.jpg'))
+        new_url = self.get_urls()['url']
+        if new_url == ('404' or '403'):
+            pass
+        else:
+            self.set_wall(download(new_url,\
+            self.main_folder+'/temp.jpg'))
 
     def set_wall(self, file_name):
         '''this is critical module, depending on de it sets walls'''
@@ -79,15 +83,21 @@ xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()#nosec, rew
             params.append(('sub_category', sub_cat))
         if not params:
             params = [('random', '1')]
-        json_answer = json.loads(requests.get(self.api\
-         + '/walls', params=params).text)
+        answer = requests.get(self.api\
+         + '/walls', params=params)
+        json_answer = json.loads(answer.text)
         if json_answer['success']:
             print(params)
             result = json_answer['content']
         else:
-            print('something wrong and its on client side')
             print('here the params', params)
+            if answer.status_code == '404':
+                print('SERVER ANSWERS 404 ON', answer.url)
+            if answer.status_code == '403':
+                print('SERVER ANSWERS 403 ON', answer.url)
+            result = answer.status_code
         return result
+
 
     def get_settings(self):
         '''gets list of settings'''
@@ -132,7 +142,6 @@ class Filer():
                 if not name.split('::')[2] in self.settings['categories']:
                     self.settings['categories'][name.split('::')[2]]= []
                 self.settings['categories'][name.split('::')[2]].append(name.split('::')[0])
-            self.dump()
         else:
             print('removing', name)
             if 'cat_' in name:
@@ -142,7 +151,13 @@ class Filer():
             elif 'sca_' in name:
                 lst = name.split("::")
                 self.settings['categories'][lst[2]].remove(lst[0][1:])
-            self.dump()
+        del_list = []
+        for i in self.settings['categories']:
+            if not self.settings['categories'][i]:
+                del_list.append(i)
+        for i in del_list:
+            del self.settings['categories'][i]
+        self.dump()
 
     def dump(self):
         '''this function dumps settings to file'''
