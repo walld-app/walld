@@ -9,7 +9,7 @@ menu_def = ['BLANK', ['spin_dice', '---', '&Save', 'Save as...', 'Category',wall
 'Resolution', ['16:9::res_', '16:10::res_', '21:9::res_'], 'E&xit', '!master']]
 
 print(menu_def)
-tray = sg.SystemTray(menu=menu_def, filename=r'temp/kk.x-icon')
+tray = sg.SystemTray(menu=menu_def)
 
 def make_flip(item): #что если сразу лезть в файл настроек и там все менять? далее вызывать tray_update()
     #if "cat_" in item:
@@ -45,7 +45,10 @@ def restore_settings():
     for i in walld.get_settings()['categories']:
         for l in walld.get_settings()['categories'][i]:
             nibba = l +'::sca_::' +i
-            second = menu_def[1][5].index(i+'::cat_') +1
+            try:
+                second = menu_def[1][5].index(i+'::cat_') +1
+            except ValueError:
+                break
             last = (menu_def[1][5][second].index(nibba))
             menu_def[1][5][second][last] = "*" + nibba
     for i in walld.get_settings()['resolutions']:

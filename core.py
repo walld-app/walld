@@ -4,6 +4,7 @@ import random
 import os
 import subprocess #nosec
 import requests
+import ctypes #MANY THANKS TO J.J AND MESKSR DUDES YOU SAVED MY BURNED UP ASS https://stackoverflow.com/questions/1977694/how-can-i-change-my-desktop-background-with-python
 
 class Walld():
     '''this class represents almost all walld functions except trays one'''
@@ -12,14 +13,13 @@ class Walld():
         self.filer = Filer(self.main_folder)
         self.api = api
         self.save_path = self.main_folder+'/saved/' + str(random.random())#nosec
-        if os.name == 'nt':
+        if os.name == 'nt': #here comes windows specific stuff
             self.desktop_environment = 'Windows'
         else:
             code = "/usr/bin/env | /usr/bin/grep DESKTOP_SESSION= \
             | /usr/bin/awk -F= '{print $2}'"
             self.desktop_environment = \
             subprocess.check_output(code, shell=True).decode('ascii')#nosec, redo
-        print('de is', self.desktop_environment)
         if not os.path.exists(self.main_folder):
             print("can`t see "\
             + self.main_folder + " folder!")
@@ -60,6 +60,8 @@ xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()#nosec, rew
             subprocess.run(['/usr/bin/gsettings', 'set',#nosec wont fix
 'org.gnome.desktop.background', 'picture-uri file://', file_name])#nosec wont fix
         elif self.desktop_environment == 'Windows':
+            print(file_name)
+            ctypes.windll.user32.SystemParametersInfoW(20, 0, file_name , 0)
             print('there`s need to make powershell script')
 
     def change_option(self, name, add=False):
