@@ -41,11 +41,14 @@ class Walld():
     def spin_dice(self):
         '''making a list of urls by accessing a db, than sets wall'''
         new_url = self.get_urls()['url']
-        if new_url == ('404' or '403'):
-            pass
-        else:
-            self.set_wall(download(new_url,\
-            self.main_folder+'/temp.jpg'))
+        if new_url == (404 or 403): 
+            print('API IS NOT RESPONDING CORRECTLY') # tell this to user
+        else:# api on that state is working BUT is this url good?
+            if check_url(new_url):
+                self.set_wall(download(new_url,\
+                self.main_folder+'/temp.jpg'))
+            else:
+                print('check_url function is failed, doing nothing!') #need to tell this to user and send me mail
 
     def set_wall(self, file_name):
         '''this is critical module, depending on de it sets walls'''
@@ -170,3 +173,11 @@ def download(url, file_name):
         response = requests.get(url)
         file.write(response.content)
     return file_name
+
+def check_url(url):
+    bad_codes = [404, 403, 501]
+    ll = requests.get(url).status_code
+    if ll in bad_codes:
+        return False
+    else:
+         return True
