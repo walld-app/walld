@@ -3,8 +3,9 @@ import json
 import random
 import os
 import subprocess #nosec
+import ctypes#MANY THANKS TO J.J AND MESKSR DUDES YOU SAVED MY BURNED UP ASS
 import requests
-import ctypes #MANY THANKS TO J.J AND MESKSR DUDES YOU SAVED MY BURNED UP ASS https://stackoverflow.com/questions/1977694/how-can-i-change-my-desktop-background-with-python
+#stackoverflow.com/questions/1977694/how-can-i-change-my-desktop-background-with-python
 
 class Walld():
     '''this class represents almost all walld functions except trays one'''
@@ -41,14 +42,15 @@ class Walld():
     def spin_dice(self):
         '''making a list of urls by accessing a db, than sets wall'''
         new_url = self.get_urls()['url']
-        if new_url == (404 or 403): 
+        if new_url == (404 or 403):
             print('API IS NOT RESPONDING CORRECTLY') # tell this to user
         else:# api on that state is working BUT is this url good?
             if check_url(new_url):
                 self.set_wall(download(new_url,\
                 self.main_folder+'/temp.jpg'))
             else:
-                print('check_url function is failed, doing nothing!') #need to tell this to user and send me mail
+                print('check_url function is failed, doing nothing!')
+                #need to tell this to user and send me mail
 
     def set_wall(self, file_name):
         '''this is critical module, depending on de it sets walls'''
@@ -57,18 +59,20 @@ class Walld():
 xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()#nosec, rewrite
             print(mon_list)
             for i in mon_list:
-                print('here comes')
-                subprocess.call(['/usr/bin/xfconf-query',#nosec wont fix
-'--channel', 'xfce4-desktop', '--property', i, '--set', file_name])
+                subprocess.call(['/usr/bin/xfconf-query',#nosec
+                                 '--channel', 'xfce4-desktop', '--property',
+                                 i, '--set', file_name])
         elif self.desktop_environment == 'mate\n': #experimental
             subprocess.run(['/usr/bin/gsettings', 'set',#nosec wont fix
- 'org.mate.background', 'picture-filename', file_name])
+                            'org.mate.background', 'picture-filename',
+                            file_name])
         elif self.desktop_environment == 'gnome\n': #experimental
             subprocess.run(['/usr/bin/gsettings', 'set',#nosec wont fix
-'org.gnome.desktop.background', 'picture-uri file://', file_name])#nosec wont fix
+                            'org.gnome.desktop.background',
+                            'picture-uri file://', file_name])
         elif self.desktop_environment == 'Windows':
             print(file_name)
-            ctypes.windll.user32.SystemParametersInfoW(20, 0, file_name , 0)
+            ctypes.windll.user32.SystemParametersInfoW(20, 0, file_name, 0)
             print('there`s need to make powershell script')
 
     def change_option(self, name, add=False):
@@ -80,8 +84,8 @@ xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()#nosec, rew
         params = []
         if self.filer.settings['categories']:
             print(self.filer.settings['categories'])
-            cat = random.choice(list(self.filer.settings['categories'].keys()))
-            sub_cat = random.choice(self.filer.settings['categories'][cat])
+            cat = random.choice(list(self.filer.settings['categories'].keys()))#nosec
+            sub_cat = random.choice(self.filer.settings['categories'][cat])#nosec
             params.append(("category", cat))
             params.append(('sub_category', sub_cat))
         if not params:
@@ -143,7 +147,7 @@ class Filer():
                 self.settings['resolutions'].append(name)
             elif 'sca_' in name:
                 if not name.split('::')[2] in self.settings['categories']:
-                    self.settings['categories'][name.split('::')[2]]= []
+                    self.settings['categories'][name.split('::')[2]] = []
                 self.settings['categories'][name.split('::')[2]].append(name.split('::')[0])
         else:
             print('removing', name)
@@ -175,9 +179,9 @@ def download(url, file_name):
     return file_name
 
 def check_url(url):
+    '''checks urls for bad result codes'''
     bad_codes = [404, 403, 501]
-    ll = requests.get(url).status_code
-    if ll in bad_codes:
+    result = requests.get(url).status_code
+    if result in bad_codes:
         return False
-    else:
-         return True
+    return True
