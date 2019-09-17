@@ -11,31 +11,25 @@ menu_def = ['BLANK', ['spin_dice', '---', '&Save', 'Save as...', 'Category',wall
 tray = sg.SystemTray(menu=menu_def)
 
 def make_flip(item): #что если сразу лезть в файл настроек и там все менять? далее вызывать tray_update()
-    #if "cat_" in item:
-     #   print('cat in item')
-    #    place = 5
+    if 'sca_' in item:
+        place =  5
+    elif "res_" in item:
+        place = 7
+    var = item.split('::')[2]+'::cat_'
+    second = menu_def[1][place].index(var) +1
+    last = (menu_def[1][place][second].index(item))
+    
     if '*' in item:
         if 'sca_' in item:
-            place =  5
-            var = item.split('::')[2]+'::cat_'
-            second = menu_def[1][place].index(var) +1
-            last = (menu_def[1][place][second].index(item))
-            menu_def[1][place][second][last] = item[1:]
+            menu_def[1][place][second][last] = item[1:] #this is for sub cat if * in it
         elif "res_" in item:
-            place = 7
             menu_def[1][place][menu_def[1][place].index(item)] = item[1:]
         #menu_def[1][place][menu_def[1][place].index(item)] = item[1:] #dont touch it dumbass
         walld.change_option(item)
     else:
- # было бы круто поработать тут, необходимо пройтись по всему листу и под листам и раздать/убрать звездочки
         if 'sca_' in item:
-            place =  5
-            var = item.split('::')[2]+'::cat_'
-            second = menu_def[1][place].index(var) +1
-            last = (menu_def[1][place][second].index(item))
             menu_def[1][place][second][last] = '*' + item
         elif "res_" in item:
-            place = 7
             menu_def[1][place][menu_def[1][place].index(item)] = '*' + item
         walld.change_option(item, add=True)
     tray.Update(menu=menu_def)
@@ -72,8 +66,7 @@ def tray_start():
         elif ('cat_' in menu_item or 'res_' in menu_item or 'sca_' in menu_item) :
             print('aha')
             make_flip(menu_item)
-            
-        #ТУТ НУЖЕН ЦИКЛ FOR ДЛЯ ПРОШЕРСТЕНИЯ ВСЕХ ЛИСТОВ
+
            
         elif menu_item == 'spin_dice':
             walld.spin_dice()
