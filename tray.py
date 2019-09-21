@@ -10,7 +10,7 @@ menu_def = ['BLANK', ['spin_dice', '---', '&Save', 'Save as...', 'Category',\
 walld.get_categories(), 'Resolution', ['16:9::res_', '16:10::res_', '21:9::res_'],\
  'E&xit', '!master']]
 
-TRAY = sg.SystemTray(menu=menu_def)
+TRAY = sg.SystemTray(menu=menu_def, data_base64=config.ICON)
 
 def make_flip(item): # сразу лезть в файл настроек и там все менять? далее вызывать tray_update()
     '''operates with settings and updates tray with dots'''
