@@ -70,6 +70,9 @@ xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()#nosec, rew
             subprocess.run(['/usr/bin/gsettings', 'set',#nosec wont fix
                             'org.gnome.desktop.background',
                             'picture-uri file://', file_name])
+
+        elif self.desktop_environment == 'i3\n':
+            subprocess.run(['/usr/bin/feh', '--bg-scale', file_name])
         elif self.desktop_environment == 'Windows':
             print(file_name)
             ctypes.windll.user32.SystemParametersInfoW(20, 0, file_name, 0)
