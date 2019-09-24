@@ -6,6 +6,7 @@ import subprocess #nosec
 import ctypes#MANY THANKS TO J.J AND MESKSR DUDES YOU SAVED MY BURNED UP ASS
 import requests
 import shutil
+import asyncio
 #stackoverflow.com/questions/1977694/how-can-i-change-my-desktop-background-with-python
 
 class Walld():
