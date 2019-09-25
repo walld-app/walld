@@ -5,6 +5,7 @@ import os
 import subprocess #nosec
 import ctypes#MANY THANKS TO J.J AND MESKSR DUDES YOU SAVED MY BURNED UP ASS
 import requests
+import shutil
 #stackoverflow.com/questions/1977694/how-can-i-change-my-desktop-background-with-python
 
 class Walld():
@@ -13,7 +14,8 @@ class Walld():
         self.main_folder = main_folder
         self.filer = Filer(self.main_folder)
         self.api = api
-        self.save_path = self.main_folder+'/saved/' + str(random.random())#nosec
+        self.save_path = self.main_folder+'/saved/' + str(random.random()) + '.png'#nosec
+        self.main_folder_temp = self.main_folder + '/temp.jpg'
         if os.name == 'nt': #here comes windows specific stuff
             self.desktop_environment = 'Windows'
         else:
@@ -30,14 +32,15 @@ class Walld():
     def save_image(self, name=False):
         '''copy image to specific(if passed) folder or to standart
         self.save_path path'''
+        print(self.save_path)
         if name:
-            subprocess.run(['/usr/bin/cp', self.main_folder+'/temp.jpg', name]\
-            , shell=False)#nosec
+            shutil.copyfile(self.main_folder_temp, name)#nosec
             print('saved at ' + name)
         else:
-            subprocess.run(['/usr/bin/cp', self.main_folder+'/temp.jpg',\
-             self.save_path], shell=False)#nosec wont fix
+            shutil.copyfile(self.main_folder_temp,\
+             self.save_path)#nosec wont fix
             print('saved at ' + self.save_path)
+            self.save_path = self.main_folder+'/saved/' + str(random.random()) + '.png'
 
     def spin_dice(self):
         '''making a list of urls by accessing a db, than sets wall'''
@@ -75,7 +78,6 @@ xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()#nosec, rew
         elif self.desktop_environment == 'Windows':
             print(file_name)
             ctypes.windll.user32.SystemParametersInfoW(20, 0, file_name, 0)
-            print('there`s need to make powershell script')
 
     def change_option(self, name, add=False):
         '''need to rewrite it'''
