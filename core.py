@@ -70,7 +70,6 @@ xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()#nosec, rew
             subprocess.run(['/usr/bin/gsettings', 'set',#nosec wont fix
                             'org.gnome.desktop.background',
                             'picture-uri file://', file_name])
-
         elif self.desktop_environment == 'i3\n':
             subprocess.run(['/usr/bin/feh', '--bg-scale', file_name])
         elif self.desktop_environment == 'Windows':
@@ -108,7 +107,6 @@ xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()#nosec, rew
             result = answer.status_code
         return result
 
-
     def get_settings(self):
         '''gets list of settings'''
         return self.filer.settings
@@ -123,6 +121,7 @@ xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()#nosec, rew
             ong.append([l+'::sca_::'+ i['category']  for l in i['subs']])
         return ong
 
+
 class Filer():
     '''Abstraction for files and settings'''
     def __init__(self, main_folder):
@@ -131,6 +130,9 @@ class Filer():
         if not os.path.exists(self.main_folder):
             print('creating!' + self.main_folder)
             os.mkdir(self.main_folder)
+        if not os.path.exists(self.main_folder+'/saved/'):
+            print('creating!' + self.main_folder+'/saved/')
+            os.mkdir(self.main_folder+'/saved/')
         print('checking options!')
         try:
             with open(self.settings_file, 'r') as file:
