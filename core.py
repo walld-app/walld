@@ -6,6 +6,7 @@ import subprocess #nosec
 import ctypes#MANY THANKS TO J.J AND MESKSR DUDES YOU SAVED MY BURNED UP ASS
 import requests
 import shutil
+import platform
 #stackoverflow.com/questions/1977694/how-can-i-change-my-desktop-background-with-python
 
 class Walld():
@@ -16,8 +17,8 @@ class Walld():
         self.api = api
         self.save_path = self.main_folder+'/saved/' + str(random.random()) + '.png'#nosec
         self.main_folder_temp = self.main_folder + '/temp.jpg'
-        if os.name == 'nt': #here comes windows specific stuff
-            self.desktop_environment = 'Windows'
+        if  platform.system() == 'Windows' : #here comes windows specific stuff
+            self.desktop_environment = platform.system()
         else:
             code = "/usr/bin/env | /usr/bin/grep DESKTOP_SESSION= \
             | /usr/bin/awk -F= '{print $2}'"
@@ -76,8 +77,13 @@ xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()#nosec, rew
         elif self.desktop_environment == 'i3\n':
             subprocess.run(['/usr/bin/feh', '--bg-scale', file_name])
         elif self.desktop_environment == 'Windows':
-            print(file_name)
+            # this is windows specific stuff, here we update our "online" wallpaper
             ctypes.windll.user32.SystemParametersInfoW(20, 0, file_name, 0)
+            # and here we update our registry with power shell, will it work on win7? who knows
+            subprocess.call(['powershell', 'Set-ItemProperty', '-path',
+                            '\'HKCU:\\Control Panel\\Desktop\\\'', '-name',
+                            'wallpaper', '-value', file_name])
+            subprocess.call(['rundll32.exe', 'user32.dll,', 'UpdatePerUserSystemParameters'])
 
     def change_option(self, name, add=False):
         '''need to rewrite it'''
