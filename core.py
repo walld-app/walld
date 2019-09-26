@@ -194,7 +194,8 @@ def download(url, file_name):
 def check_url(url):
     '''checks urls for bad result codes'''
     bad_codes = [404, 403, 501]
-    result = requests.get(url).status_code
-    if result in bad_codes:
+    result = requests.get(url, stream=True)
+    result.close
+    if result.status_code in bad_codes:
         return False
     return True
