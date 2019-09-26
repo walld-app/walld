@@ -15,7 +15,7 @@ if args.c:
     walld.spin_dice()
     exit()
 
-menu_def = ['BLANK', ['spin_dice', '---', '&Save', 'Save as...', 'Category',\
+menu_def = ['BLANK', ['Change wallpaper', '---', '&Save', 'Save as...', 'Category',\
 walld.get_categories(), 'Resolution', ['16:9::res_', '16:10::res_', '21:9::res_'],\
  'E&xit', '!master']]
 
@@ -74,15 +74,12 @@ def tray_start():
             ('JPEG files', '*.jpg')))
             walld.save_image(apath)
 
-        elif menu_item == '__ACTIVATED__':
+        elif (menu_item == '__ACTIVATED__' or menu_item == 'Change wallpaper'):
             walld.spin_dice()
 
         elif ('cat_' in menu_item or 'res_' in menu_item or 'sca_' in menu_item):
             print('aha')
             make_flip(menu_item)
-
-        elif menu_item == 'spin_dice':
-            walld.spin_dice()
 
         elif menu_item == 'Save':
             walld.save_image()
