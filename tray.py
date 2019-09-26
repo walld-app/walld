@@ -3,8 +3,17 @@
 import PySimpleGUIQt as sg # сука, уже не катит
 import core
 import config
+import argparse
 
 walld = core.Walld(config.API, config.MAIN_FOLDER)
+parser = argparse.ArgumentParser()
+parser.add_argument('-c', action='store_true', help='change wallpaper')
+args = parser.parse_args()
+
+if args.c:
+    print(args.c)
+    walld.spin_dice()
+    exit()
 
 menu_def = ['BLANK', ['spin_dice', '---', '&Save', 'Save as...', 'Category',\
 walld.get_categories(), 'Resolution', ['16:9::res_', '16:10::res_', '21:9::res_'],\
@@ -78,4 +87,7 @@ def tray_start():
         elif menu_item == 'Save':
             walld.save_image()
 
-tray_start()
+
+if __name__ == '__main__':
+    tray_start()
+    
