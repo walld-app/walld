@@ -66,14 +66,14 @@ xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()#nosec, rew
                 subprocess.call(['/usr/bin/xfconf-query',#nosec
                                  '--channel', 'xfce4-desktop', '--property',
                                  i, '--set', file_name])
-        elif self.desktop_environment == 'mate\n': #experimental
+        elif self.desktop_environment == 'mate\n' or 'lightdm-xsession': #experimental
             subprocess.run(['/usr/bin/gsettings', 'set',#nosec wont fix
                             'org.mate.background', 'picture-filename',
                             file_name])
         elif self.desktop_environment == 'gnome\n': #experimental
             subprocess.run(['/usr/bin/gsettings', 'set',#nosec wont fix
                             'org.gnome.desktop.background',
-                            'picture-uri file://', file_name])
+                            'picture-uri', '"file://' + file_name + '"'])
         elif self.desktop_environment == 'i3\n':
             subprocess.run(['/usr/bin/feh', '--bg-scale', file_name])
         elif self.desktop_environment == 'Windows':
@@ -128,7 +128,6 @@ xfce4-desktop -l | grep "workspace0/last-image"', shell=True).split()#nosec, rew
             ong.append(i['category']+'::cat_')
             ong.append([l+'::sca_::'+ i['category']  for l in i['subs']])
         return ong
-
 
 class Filer():
     '''Abstraction for files and settings'''
