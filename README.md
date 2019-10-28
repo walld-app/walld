@@ -1,4 +1,8 @@
-# <p align="center">WallD
+# <p align="center">WallD</p>
+<p align="center">
+  <img src="https://github.com/kz159/walld/raw/master/walld.png">
+</p>
+  
 This is a tiny script that "still" uses qt to sit in your tray and change wallpapers, just for you.
 Main idea is to grub some fresh and good wallpapers based on your preferences, tags, likes, etc
 
