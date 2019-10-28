@@ -1,4 +1,4 @@
-# <p align="center">WallD</p>
+# WallD
 <p align="center">
   <img src="https://github.com/kz159/walld/raw/master/walld.png">
 </p>
