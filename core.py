@@ -4,9 +4,11 @@ import random
 import os
 import subprocess #nosec
 import ctypes#MANY THANKS TO J.J AND MESKSR DUDES YOU SAVED MY BURNED UP ASS
-import requests # replace to hyper for http 2.0
+import datetime
 import shutil
 import platform
+import requests # replace to hyper for http 2.0
+
 #stackoverflow.com/questions/1977694/how-can-i-change-my-desktop-background-with-python
 
 class Walld():
@@ -18,31 +20,22 @@ class Walld():
         self.save_path = self.main_folder+'/saved/' + str(random.random()) + '.png'#nosec
         self.main_folder_temp = self.main_folder + '/temp.jpg'
 
-        if  platform.system() == 'Windows' : #here comes windows specific stuff
+        if  platform.system() == 'Windows': #here comes windows specific stuff
             self.desktop_environment = platform.system()
-        
         else:
             code = "/usr/bin/env | /usr/bin/grep DESKTOP_SESSION= \
             | /usr/bin/awk -F= '{print $2}'"
             self.desktop_environment = \
             subprocess.check_output(code, shell=True).decode('ascii')#nosec, redo
-        
-        if not os.path.exists(self.main_folder):
-            print("can`t see "\
-            + self.main_folder + " folder!")
-            exit(1)
-        
         print('class walld started!')
 
     def save_image(self, name=False):
         '''copy image to specific(if passed) folder or to standart
         self.save_path path'''
         print(self.save_path)
-        
         if name:
             shutil.copyfile(self.main_folder_temp, name)#nosec
             print('saved at ' + name)
-        
         else:
             shutil.copyfile(self.main_folder_temp,\
              self.save_path)#nosec wont fix
@@ -52,13 +45,11 @@ class Walld():
     def spin_dice(self):
         '''making a list of urls by accessing a db, than sets wall'''
         new_url = self.get_urls()['url']
-        
         if new_url == (404 or 403):
             print('API IS NOT RESPONDING CORRECTLY') # tell this to user
-        
-        else:# api on that state is working BUT is this url good?
-        
+        else:# api on that state is working BUT is this url good? #redo
             if check_url(new_url):
+                self.filer.write_log(new_url)
                 self.set_wall(download(new_url,\
                 self.main_folder+'/temp.jpg'))
             else:
@@ -71,7 +62,7 @@ class Walld():
             mon_list = subprocess.check_output('/usr/bin/xfconf-query -c \
                                                 xfce4-desktop -l | grep \
                                                 "workspace0/last-image"',
-                                                 shell=True).split()#nosec, rewrite
+                                               shell=True).split()#nosec, rewrite
             for i in mon_list:
                 subprocess.call(['/usr/bin/xfconf-query',#nosec
                                  '--channel', 'xfce4-desktop', '--property',
@@ -88,7 +79,7 @@ class Walld():
                             'picture-uri', '"file://' + file_name + '"'])
 
         elif self.desktop_environment == 'cinnamon2d\n':
-             subprocess.run(['/usr/bin/gsettings', 'set',#nosec wont fix
+            subprocess.run(['/usr/bin/gsettings', 'set',#nosec wont fix
                             'org.cinnamon.desktop.background',
                             'picture-uri', '"file://' + file_name + '"'])
 
@@ -118,17 +109,14 @@ class Walld():
             sub_cat = random.choice(self.filer.settings['categories'][cat])#nosec
             params.append(("category", cat))
             params.append(('sub_category', sub_cat))
-        
         if not params:
             params = [('random', '1')]
         answer = requests.get(self.api\
          + '/walls', params=params)
         json_answer = json.loads(answer.text)
-        
         if json_answer['success']:
             print(params)
             result = json_answer['content']
-        
         else:
             print('here the params', params)
             if answer.status_code == '404':
@@ -147,7 +135,6 @@ class Walld():
         params = {"param":"categories"}
         json_answer = json.loads(requests.get(self.api, params=params).text)
         ong = []
-        
         for i in json_answer['content']:
             ong.append(i['category']+'::cat_')
             ong.append([l+'::sca_::'+ i['category']  for l in i['subs']])
@@ -158,17 +145,21 @@ class Filer():
     def __init__(self, main_folder):
         self.main_folder = main_folder
         self.settings_file = self.main_folder + '/prefs.json'
-        
+        self.log_file = self.main_folder + '/links.log'
+
+        if not os.path.exists(self.main_folder):
+            print("can`t see "\
+            + self.main_folder + " folder!")
+            os.mkdir(self.main_folder)
+
         if not os.path.exists(self.main_folder):
             print('creating!' + self.main_folder)
             os.mkdir(self.main_folder)
-        
+
         if not os.path.exists(self.main_folder+'/saved/'):
             print('creating!' + self.main_folder+'/saved/')
             os.mkdir(self.main_folder+'/saved/')
-        
         print('checking options!')
-        
         try:
             with open(self.settings_file, 'r') as file:
                 self.settings = json.load(file)
@@ -177,18 +168,22 @@ class Filer():
             self.settings = {'categories':{}, 'resolutions':[]}
             self.dump()
 
+    def write_log(self, string):
+        '''writes 'string' in log file'''
+        date = str(datetime.datetime.now())
+        with open(self.log_file, 'a') as log:
+            log.write(date + ' - ' + string + '\n')
+
     def change_option(self, name, add=False):
         '''works with options file'''
         if add:
             print('adding', name)
             if 'res_' in name:
                 self.settings['resolutions'].append(name)
-        
             elif 'sca_' in name:
                 if not name.split('::')[2] in self.settings['categories']:
                     self.settings['categories'][name.split('::')[2]] = []
                 self.settings['categories'][name.split('::')[2]].append(name.split('::')[0])
-        
         else:
             print('removing', name)
             if 'cat_' in name:
@@ -226,7 +221,7 @@ def check_url(url):
     '''checks urls for bad result codes'''
     bad_codes = [404, 403, 501]
     result = requests.get(url, stream=True)
-    result.close
+    result.close()
     if result.status_code in bad_codes:
         return False
     return True
