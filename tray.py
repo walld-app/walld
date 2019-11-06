@@ -1,9 +1,10 @@
 #!/bin/python3
 '''Main script that sits in tray and calls walld for help'''
-import PySimpleGUIQt as sg # сука, уже не катит
+import sys
+import argparse
+import PySimpleGUIQt
 import core
 import config
-import argparse
 
 walld = core.Walld(config.API, config.MAIN_FOLDER)
 parser = argparse.ArgumentParser()
@@ -13,18 +14,19 @@ args = parser.parse_args()
 if args.c:
     print(args.c)
     walld.spin_dice()
-    exit()
+    sys.exit()
 
+#'Resolution', ['16:9::res_', '16:10::res_', '21:9::res_']
 menu_def = ['BLANK', ['Change wallpaper', '---', '&Save', 'Save as...', 'Category',\
-walld.get_categories(), 'Resolution', ['16:9::res_', '16:10::res_', '21:9::res_'],\
- 'E&xit', '!master']]
+walld.get_categories(), 'E&xit', '!master']]
 
-TRAY = sg.SystemTray(menu=menu_def, data_base64=config.ICON)
+TRAY = PySimpleGUIQt.SystemTray(menu=menu_def, data_base64=config.ICON)
 
 def make_flip(item): # сразу лезть в файл настроек и там все менять? далее вызывать tray_update()
     '''operates with settings and updates tray with dots'''
     if 'sca_' in item:
         place = 5
+
     elif "res_" in item:
         place = 7
     var = item.split('::')[2]+'::cat_'
@@ -70,11 +72,11 @@ def tray_start():
             break
 
         elif menu_item == 'Save as...':
-            apath = sg.PopupGetFile('hi', save_as=True, file_types=(('PNG files', '*.png'),\
+            apath = PySimpleGUIQt.PopupGetFile('hi', save_as=True, file_types=(('PNG files', '*.png'),\
             ('JPEG files', '*.jpg')))
             walld.save_image(apath)
 
-        elif (menu_item == '__ACTIVATED__' or menu_item == 'Change wallpaper'):
+        elif menu_item in ('__ACTIVATED__', 'Change wallpaper'):
             walld.spin_dice()
 
         elif ('cat_' in menu_item or 'res_' in menu_item or 'sca_' in menu_item):
