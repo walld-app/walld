@@ -17,14 +17,15 @@ class Walld():
         self.main_folder = main_folder
         self.filer = Filer(self.main_folder)
         self.api = api
-        self.save_path = self.main_folder+'/saved/' + str(random.random()) + '.png'#nosec
+        self.save_path = (self.main_folder+'/saved/' +
+                          str(random.random()) + '.png')#nosec
         self.main_folder_temp = self.main_folder + '/temp.jpg'
 
-        if  platform.system() == 'Windows': #here comes windows specific stuff
+        if platform.system() == 'Windows': #here comes windows specific stuff
             self.desktop_environment = platform.system()
         else:
-            code = "/usr/bin/env | /usr/bin/grep DESKTOP_SESSION= \
-            | /usr/bin/awk -F= '{print $2}'"
+            code = ("/usr/bin/env | /usr/bin/grep DESKTOP_SESSION= "
+                    "| /usr/bin/awk -F= '{print $2}'")
             self.desktop_environment = \
             subprocess.check_output(code, shell=True).decode('ascii')#nosec, redo
         print('class walld started!')
@@ -111,8 +112,8 @@ class Walld():
             params.append(('sub_category', sub_cat))
         if not params:
             params = [('random', '1')]
-        answer = requests.get(self.api\
-         + '/walls', params=params)
+        answer = requests.get(self.api +
+                              '/walls', params=params)
         json_answer = json.loads(answer.text)
         if json_answer['success']:
             print(params)
