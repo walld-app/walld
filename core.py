@@ -7,7 +7,7 @@ import ctypes#MANY THANKS TO J.J AND MESKSR DUDES YOU SAVED MY BURNED UP ASS
 import datetime
 import shutil
 import platform
-import requests # replace to hyper for http 2.0
+import requests # replace to hyper for http 2.0 MAYBE? HYPER IS KIND OF DEAD??
 
 #stackoverflow.com/questions/1977694/how-can-i-change-my-desktop-background-with-python
 
@@ -30,7 +30,7 @@ class Walld():
             subprocess.check_output(code, shell=True).decode('ascii')#nosec, redo
         print('class walld started!')
 
-    def save_image(self, name=False):
+    def save_image(self, name=None):
         '''copy image to specific(if passed) folder or to standart
         self.save_path path'''
         print(self.save_path)
@@ -38,10 +38,11 @@ class Walld():
             shutil.copyfile(self.main_folder_temp, name)#nosec
             print('saved at ' + name)
         else:
-            shutil.copyfile(self.main_folder_temp,\
-             self.save_path)#nosec wont fix
+            shutil.copyfile(self.main_folder_temp,
+                            self.save_path) # nosec wont fix
             print('saved at ' + self.save_path)
-            self.save_path = self.main_folder+'/saved/' + str(random.random()) + '.png'
+            self.save_path = (f'{self.main_folder}/saved/'
+                              f'{str(random.random())}.png') # nosec
 
     def spin_dice(self):
         '''making a list of urls by accessing a db, than sets wall'''
@@ -60,9 +61,9 @@ class Walld():
     def set_wall(self, file_name):
         '''this is critical module, depending on de it sets walls'''
         if self.desktop_environment == 'xfce\n':
-            mon_list = subprocess.check_output('/usr/bin/xfconf-query -c \
-                                                xfce4-desktop -l | grep \
-                                                "workspace0/last-image"',
+            mon_list = subprocess.check_output('/usr/bin/xfconf-query -c '
+                                               'xfce4-desktop -l | grep '
+                                               '"workspace0/last-image"',
                                                shell=True).split()#nosec, rewrite
             for i in mon_list:
                 subprocess.call(['/usr/bin/xfconf-query',#nosec
@@ -70,7 +71,7 @@ class Walld():
                                  i, '--set', file_name])
 
         elif self.desktop_environment == ('mate\n' or 'lightdm-xsession'): #experimental
-            subprocess.run(['/usr/bin/gsettings', 'set',#nosec wont fix
+            subprocess.run(['/usr/bin/gsettings', 'set', # nosec wont fix
                             'org.mate.background', 'picture-filename',
                             file_name])
 
@@ -85,16 +86,19 @@ class Walld():
                             'picture-uri', '"file://' + file_name + '"'])
 
         elif self.desktop_environment == 'i3\n':
-            subprocess.run(['/usr/bin/feh', '--bg-scale', file_name])
+            subprocess.run(['/usr/bin/feh', '--bg-scale', file_name]) 
 
         elif self.desktop_environment == 'Windows':
-            # this is windows specific stuff, here we update our "online" wallpaper
+            # this is windows specific stuff
+            # here we update our "online" wallpaper
             ctypes.windll.user32.SystemParametersInfoW(20, 0, file_name, 0)
-            # and here we update our registry with power shell, will it work on win7? who knows
+            # and here we update our registry with power shell
+            # will it work on win7? who knows
             subprocess.call(['powershell', 'Set-ItemProperty', '-path',
                             '\'HKCU:\\Control Panel\\Desktop\\\'', '-name',
                             'wallpaper', '-value', file_name])
-            subprocess.call(['rundll32.exe', 'user32.dll,', 'UpdatePerUserSystemParameters'])
+            subprocess.call(['rundll32.exe',
+                             'user32.dll,', 'UpdatePerUserSystemParameters'])
 
     def change_option(self, name, add=False):
         '''need to rewrite it'''
@@ -134,7 +138,8 @@ class Walld():
     def get_categories(self):
         '''gets a list of all categories by api method'''
         params = {"param":"categories"}
-        json_answer = json.loads(requests.get(self.api, params=params).text)
+        req = requests.get(self.api, params=params).text
+        json_answer = json.loads(req)
         ong = []
         for i in json_answer['content']:
             ong.append(i['category']+'::cat_')
@@ -184,7 +189,8 @@ class Filer():
             elif 'sca_' in name:
                 if not name.split('::')[2] in self.settings['categories']:
                     self.settings['categories'][name.split('::')[2]] = []
-                self.settings['categories'][name.split('::')[2]].append(name.split('::')[0])
+                self.settings['categories'][
+                              name.split('::')[2]].append(name.split('::')[0])
         else:
             print('removing', name)
             if 'cat_' in name:

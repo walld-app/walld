@@ -1,8 +1,8 @@
 from os.path import expanduser
 
-home = expanduser("~")
-API = "https://api.walld.net/apiv01"
-MAIN_FOLDER = home + '/.walld'
+HOME = expanduser("~")
+API = "http://127.0.0.1:8080/v1"
+MAIN_FOLDER = HOME + '/.walld'
 
 ICON = '''
 iVBORw0KGgoAAAANSUhEUgAAAJ8AAACiCAYAAABf/x+TAAAACXBIWXMAAC4jAAAuIwF4pT92AAAP
@@ -77,4 +77,3 @@ RYAi4csptwO8/RqXGchCiw/jAGOx2MtwcbGGRebhpVIpgidQqPFhDOBKDQCH4YTwDmiaWuALPT5M
 A8BhWOOtBngHdc8tyBE+lg2ABE8xwjchBYAEz0aE77IkABI8mxG+AgkAJHgaInxFKgGQ4GmK8JWI
 A4xGo3vKysparE9eTlkF8A65PbcgRPimCQG2tbWtbGho2AUXn00mkwRPU/8HvKXfsjGm32wAAAAA
 SUVORK5CYII='''.encode()
-
