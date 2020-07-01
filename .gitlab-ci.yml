@@ -38,7 +38,7 @@ go_docker_hub:
     script: # VENV!
     - dir
     - pip3 install -r requirements.txt
-    - pip3 install pyinstaller
-    - pyinstaller tray.py
+    - pip3 install pyinstaller 
+    - pyinstaller --onefile --noconsole tray.py
     tags:
     - windows_7
