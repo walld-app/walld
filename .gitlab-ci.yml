@@ -37,6 +37,7 @@ go_docker_hub:
     image: windowsservercore:2004
     stage: go_docker_hub
     script: # VENV!
+    - dir
     - pip3 install -r requirements.txt
     - pyinstaller tray.py
     tags:
