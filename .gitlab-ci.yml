@@ -1,8 +1,3 @@
-cache:
-  paths:
-    - .cache/pip
-
-variables:
 
 stages:
     # - test
@@ -41,11 +36,8 @@ stages:
 go_docker_hub:
     image: windowsservercore:2004
     stage: go_docker_hub
-    script:
-    - wget https://www.python.org/ftp/python/3.8.1/python-3.8.1.exe -UseBasicParsing -OutFile ./python.exe
-    - Start-Process ./python.exe -ArgumentList '/quiet InstallAllUsers=1 PrependPath=1' -Wait
+    script: # VENV!
     - pip3 install -r requirements.txt
-    - pip3 install pyinstaller
-
+    - pyinstaller tray.py
     tags:
-    - windows
+    - windows_7
