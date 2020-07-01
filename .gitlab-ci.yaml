@@ -1,0 +1,49 @@
+cache:
+  paths:
+    - .cache/pip
+
+variables:
+
+stages:
+    # - test
+    - go_docker_hub
+
+#   - python -V  # Print out python version for debugging
+#   - apk add py3-pip wget zip
+#   - wget https://dev.mrbot.im/walld/WalldDataBase/-/archive/master/WalldDataBase-master.zip
+#   - unzip WalldDataBase-master.zip
+#   - cd WalldDataBase-master
+#   - pip install -r requirements.txt --user
+#   - alembic revision --autogenerate -m "fistssas"
+#   - alembic upgrade head
+
+# test:
+#     image: python:3.8.2-alpine
+#     stage: test
+#     services:
+#         - postgres:12.2-alpine
+#         - rabbitmq:alpine
+#     script:
+#     - apk update && apk add --no-cache python3-dev pytest postgresql-dev musl-dev docker git gcc
+#     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@dev.mrbot.im/walld/WalldDataBase.git
+#     - /usr/local/bin/python -m pip install --upgrade pip
+#     - pip install -r requirements.txt
+#     - cd WalldDataBase
+#     - pip install -r requirements.txt
+#     - mkdir -p alembic/versions
+#     - alembic revision --autogenerate -m "fistssas"
+#     - alembic upgrade head
+#     - ls /usr/local/lib/python3.8/site-packages
+#     - ls /usr/lib/python3.8/site-packages
+#     - cd ../test
+#     - pytest
+
+go_docker_hub:
+    image: docker
+    stage: go_docker_hub
+    script:
+    - docker login -u kz159 -p $DOCKER_PASS
+    - docker build -t walld_grab_pexels .
+    - docker tag walld_grab_pexels kz159/walld_grab_pexels
+    - docker push kz159/walld_grab_pexels
+    
