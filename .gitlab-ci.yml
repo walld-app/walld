@@ -39,11 +39,13 @@ stages:
 #     - pytest
 
 go_docker_hub:
-    image: docker
+    image: windowsservercore:2004
     stage: go_docker_hub
     script:
-    - docker login -u kz159 -p $DOCKER_PASS
-    - docker build -t walld_grab_pexels .
-    - docker tag walld_grab_pexels kz159/walld_grab_pexels
-    - docker push kz159/walld_grab_pexels
-    
+    - wget https://www.python.org/ftp/python/3.8.1/python-3.8.1.exe -UseBasicParsing -OutFile ./python.exe
+    - Start-Process ./python.exe -ArgumentList '/quiet InstallAllUsers=1 PrependPath=1' -Wait
+    - pip3 install -r requirements.txt
+    - pip3 install pyinstaller
+
+    tags:
+    - windows
