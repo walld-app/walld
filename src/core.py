@@ -1,13 +1,16 @@
 'this is the core of walld, all functions should store here'
-import json
-import random
-import os
-import subprocess #nosec
-import ctypes#MANY THANKS TO J.J AND MESKSR DUDES YOU SAVED MY BURNED UP ASS
+import ctypes  # MANY THANKS TO J.J AND MESKSR DUDES YOU SAVED MY BURNED UP ASS
 import datetime
-import shutil
+import json
+import os
 import platform
-import requests # replace to hyper for http 2.0 MAYBE? HYPER IS KIND OF DEAD??
+import random
+import shutil
+import subprocess  # nosec
+
+from requests import get
+
+from helpers import download
 
 #stackoverflow.com/questions/1977694/how-can-i-change-my-desktop-background-with-python
 
@@ -23,20 +26,23 @@ class Walld():
 
         if platform.system() == 'Windows': #here comes windows specific stuff
             self.desktop_environment = platform.system()
+
         else:
             code = ("/usr/bin/env | /usr/bin/grep DESKTOP_SESSION= "
                     "| /usr/bin/awk -F= '{print $2}'")
             self.desktop_environment = \
             subprocess.check_output(code, shell=True).decode('ascii')#nosec, redo
+
         print('class walld started!')
 
     def save_image(self, name=None):
-        '''copy image to specific(if passed) folder or to standart
-        self.save_path path'''
-        print(self.save_path)
+        '''copy image to specific(if passed)
+           folder or to standart
+           self.save_path path'''
         if name:
             shutil.copyfile(self.main_folder_temp, name)#nosec
             print('saved at ' + name)
+
         else:
             shutil.copyfile(self.main_folder_temp,
                             self.save_path) # nosec wont fix
@@ -47,19 +53,12 @@ class Walld():
     def spin_dice(self):
         '''making a list of urls by accessing a db, than sets wall'''
         new_url = self.get_urls()['url']
-        if new_url == (404 or 403):
-            print('API IS NOT RESPONDING CORRECTLY') # tell this to user
-        else:# api on that state is working BUT is this url good? #redo
-            if check_url(new_url):
-                self.filer.write_log(new_url)
-                self.set_wall(download(new_url,\
-                self.main_folder+'/temp.jpg'))
-            else:
-                print('check_url function is failed, doing nothing!')
-                #need to tell this to user and send me mail
+        self.filer.write_log(new_url)
+        self.set_wall(download(new_url,\
+        self.main_folder+'/temp.jpg'))
 
     def set_wall(self, file_name):
-        '''this is critical module, depending on de it sets walls'''
+        '''this is critical module, depending on DE it sets walls'''
         if self.desktop_environment == 'xfce\n':
             mon_list = subprocess.check_output('/usr/bin/xfconf-query -c '
                                                'xfce4-desktop -l | grep '
@@ -95,8 +94,8 @@ class Walld():
             # and here we update our registry with power shell
             # will it work on win7? who knows
             subprocess.call(['powershell', 'Set-ItemProperty', '-path',
-                            '\'HKCU:\\Control Panel\\Desktop\\\'', '-name',
-                            'wallpaper', '-value', file_name])
+                             '\'HKCU:\\Control Panel\\Desktop\\\'', '-name',
+                             'wallpaper', '-value', file_name])
             subprocess.call(['rundll32.exe',
                              'user32.dll,', 'UpdatePerUserSystemParameters'])
 
@@ -115,13 +114,11 @@ class Walld():
             params.append(("category", cat))
             params.append(('sub_category', sub_cat))
         if not params:
-            params = [('random', '1')]
-        answer = requests.get(self.api +
-                              '/walls', params=params)
-        json_answer = json.loads(answer.text)
-        if json_answer['success']:
+            params = {}
+        answer = get(self.api + '/walls', params=params)
+        result = answer.json()
+        if answer.status_code == 200:
             print(params)
-            result = json_answer['content']
         else:
             print('here the params', params)
             if answer.status_code == '404':
@@ -137,13 +134,12 @@ class Walld():
 
     def get_categories(self):
         '''gets a list of all categories by api method'''
-        params = {"param":"categories"}
-        req = requests.get(self.api, params=params).text
-        json_answer = json.loads(req)
+        params = {"categories":""}
+        req = get(self.api, params=params).json()
         ong = []
-        for i in json_answer['content']:
-            ong.append(i['category']+'::cat_')
-            ong.append([l+'::sca_::'+ i['category']  for l in i['subs']])
+        for i in req['categories']:
+            ong.append(i + '::cat_')
+            ong.append([l + '::sca_::' for l in req['categories'][i]])
         return ong
 
 class Filer():
@@ -174,13 +170,13 @@ class Filer():
             self.settings = {'categories':{}, 'resolutions':[]}
             self.dump()
 
-    def write_log(self, string):
+    def write_log(self, string): #TODO logger to file
         '''writes 'string' in log file'''
         date = str(datetime.datetime.now())
         with open(self.log_file, 'a') as log:
             log.write(date + ' - ' + string + '\n')
 
-    def change_option(self, name, add=False):
+    def change_option(self, name, add=False): # TODO getter setter
         '''works with options file'''
         if add:
             print('adding', name)
@@ -190,7 +186,7 @@ class Filer():
                 if not name.split('::')[2] in self.settings['categories']:
                     self.settings['categories'][name.split('::')[2]] = []
                 self.settings['categories'][
-                              name.split('::')[2]].append(name.split('::')[0])
+                    name.split('::')[2]].append(name.split('::')[0])
         else:
             print('removing', name)
             if 'cat_' in name:
@@ -216,19 +212,3 @@ class Filer():
         '''this function dumps settings to file'''
         with open(self.settings_file, 'w') as temp:
             json.dump(self.settings, temp)
-
-def download(url, file_name):
-    '''downloads a file, first comes url, second comes full path of file'''
-    with open(file_name, "wb") as file:
-        response = requests.get(url)
-        file.write(response.content)
-    return file_name
-
-def check_url(url):
-    '''checks urls for bad result codes'''
-    bad_codes = [404, 403, 501]
-    result = requests.get(url, stream=True)
-    result.close()
-    if result.status_code in bad_codes:
-        return False
-    return True

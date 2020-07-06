@@ -1,4 +1,5 @@
 /temp
 /__*
+/src/__*
 db.db
 .vscode

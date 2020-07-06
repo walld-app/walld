@@ -2,7 +2,7 @@
 '''Main script that sits in tray and calls walld for help'''
 import sys
 import argparse
-import PySimpleGUIQt
+from PySimpleGUIQt import SystemTray, PopupGetFile
 import core
 import config
 
@@ -17,10 +17,11 @@ if args.c:
     sys.exit()
 
 #'Resolution', ['16:9::res_', '16:10::res_', '21:9::res_']
-menu_def = ['BLANK', ['Change wallpaper', '---', '&Save', 'Save as...', 'Category',\
-walld.get_categories(), 'E&xit', '!master']]
+menu_def = ['BLANK', ['Change wallpaper', '---', '&Save',
+                      'Save as...', 'Category',
+                      walld.get_categories(), 'E&xit', '!master']]
 
-TRAY = PySimpleGUIQt.SystemTray(menu=menu_def, data_base64=config.ICON)
+TRAY = SystemTray(menu=menu_def, data_base64=config.ICON)
 
 def make_flip(item): # сразу лезть в файл настроек и там все менять?
     '''operates with settings and updates tray with dots'''
@@ -30,9 +31,11 @@ def make_flip(item): # сразу лезть в файл настроек и т�
 
     elif "res_" in item:
         place = 7
+
     var = item.split('::')[2]+'::cat_'
-    second = menu_def[1][place].index(var) +1
+    second = menu_def[1][place].index(var) + 1
     last = (menu_def[1][place][second].index(item))
+
     if '*' in item:
         if 'sca_' in item:
             menu_def[1][place][second][last] = item[1:] 
@@ -42,6 +45,7 @@ def make_flip(item): # сразу лезть в файл настроек и т�
         #menu_def[1][place][menu_def[1][place].index(item)] = item[1:]
         #dont touch it dumbass
         walld.change_option(item)
+
     else:
         if 'sca_' in item:
             menu_def[1][place][second][last] = '*' + item
@@ -49,6 +53,7 @@ def make_flip(item): # сразу лезть в файл настроек и т�
             menu_def[1][place][menu_def[1][place].index(item)] = '*' + item
         walld.change_option(item, add=True)
     TRAY.Update(menu=menu_def)
+
 
 def restore_settings():
     '''restores settings on startup'''
@@ -75,17 +80,16 @@ def tray_start():
             break
 
         elif menu_item == 'Save as...':
-            apath = PySimpleGUIQt.PopupGetFile('hi',
-                                               save_as=True,
-                                               file_types=(('PNG files', '*.png'),
-                                               ('JPEG files', '*.jpg')))
+            apath = PopupGetFile('hi',
+                                 save_as=True,
+                                 file_types=(('PNG files', '*.png'),
+                                             ('JPEG files', '*.jpg')))
             walld.save_image(apath)
 
         elif menu_item in ('__ACTIVATED__', 'Change wallpaper'):
             walld.spin_dice()
 
-        elif ('cat_' in menu_item or
-        'res_' in menu_item or 'sca_' in menu_item):
+        elif ('cat_' in menu_item or 'res_' in menu_item or 'sca_' in menu_item):
             print('aha')
             make_flip(menu_item)
 

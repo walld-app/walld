@@ -3,8 +3,8 @@
   <img src="https://github.com/kz159/walld/raw/master/walld.png">
 </p>
   
-This is a tiny script that "still" uses qt to sit in your tray and change wallpapers, just for you.
-Main idea is to grub some fresh and good wallpapers based on your preferences, tags, likes, etc
+This is a tiny script that "still" uses pysimpleguiqt to sit in your tray and change wallpapers, just for you.
+Main idea is to grab some fresh and good wallpapers based on your preferences, tags, likes, etc
 
 This script is kind of pre alpha, and if you still wanna use it than
 Please, use branch "master" and submit issues
