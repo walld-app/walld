@@ -142,6 +142,12 @@ class Walld():
             ong.append([l + '::sca_::' for l in req['categories'][i]])
         return ong
 
+    def get_categories_as_dict(self):
+        params = {"categories":""}
+        request = get(self.api, params=params).json()
+        return request['categories']
+
+
 class Filer():
     '''Abstraction for files and settings'''
     def __init__(self, main_folder):

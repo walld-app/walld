@@ -1,9 +1,12 @@
-from PyQt5.QtGui import QIcon
-from PyQt5 import QtGui, QtCore
-from PyQt5.QtWidgets import QApplication, QSystemTrayIcon, QMenu, QAction
-from config import ICON, API, MAIN_FOLDER
-from core import Walld
 from sys import argv
+
+from PyQt5 import QtCore, QtGui
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QAction, QApplication, QMenu, QSystemTrayIcon
+
+from config import API, ICON, MAIN_FOLDER
+from core import Walld
+from functools import partial
 
 app = QApplication(argv)
 app.setQuitOnLastWindowClosed(False)
@@ -22,6 +25,21 @@ tray = QSystemTrayIcon()
 tray.setIcon(icon)
 tray.setVisible(True)
 
+def print_out_cat(cat):
+    print(cat)
+
+def gen_menu():
+    cats = walld.get_categories_as_dict()
+    print(cats)
+    categories_menu = QMenu('Categories')
+    c = []
+    for category in cats:
+        action = QAction(category)
+        action.triggered.connect(lambda chk, cat=category: print(cat))
+        c.append(action)
+    categories_menu.addActions(c)
+    return categories_menu
+
 menu = QMenu()
 
 shut_down = QAction("Quit")
@@ -29,11 +47,14 @@ shut_down.triggered.connect(app.quit)
 
 change_wallpaper = QAction("Change wallpaper")
 change_wallpaper.triggered.connect(walld.spin_dice)
+settings = QAction("Settings")
+# change_wallpaper.triggered.connect(_
+cates = gen_menu()
 
 menu.addAction(change_wallpaper)
+menu.addMenu(cates)
+menu.addAction(settings)
 menu.addAction(shut_down)
-
-
 tray.setContextMenu(menu)
 
 app.exec_()
