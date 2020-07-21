@@ -147,8 +147,7 @@ class Walld():
         request = get(self.api, params=params).json()
         return request['categories']
 
-
-class Filer():
+class Filer(): # TODO rewrite to PAth
     '''Abstraction for files and settings'''
     def __init__(self, main_folder):
         self.main_folder = main_folder
