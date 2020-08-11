@@ -10,9 +10,10 @@ This script is kind of pre alpha, and if you still wanna use it than
 Please, use branch "master" and submit issues
 
 ## TODO
-making client side more accurate
-Add cinnamon, mate, gnome support
-Add windows support
+- making client side more accurate
+- Add cinnamon, mate, gnome support
+- Add windows 7 support
+- move core module to walld_core
 
 rewrite it to GTK3+(maybe)
 

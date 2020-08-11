@@ -1,6 +1,7 @@
 # TODO 500/404 handler
 import requests
 from requests import get
+from collections import namedtuple
 # from config import log
 
 def api_talk_handler(function):
@@ -23,3 +24,4 @@ def download(url, file_name):
         file.write(response.content)
     return file_name
 
+SubCat = namedtuple('SubCat', ['name', 'checked'])

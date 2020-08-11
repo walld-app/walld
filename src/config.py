@@ -2,7 +2,6 @@ from os.path import expanduser
 
 HOME = expanduser("~")
 API = "http://127.0.0.1:8080/v1"
-MAIN_FOLDER = HOME + '/.walld'
 
 ICON = '''
 iVBORw0KGgoAAAANSUhEUgAAAJ8AAACiCAYAAABf/x+TAAAACXBIWXMAAC4jAAAuIwF4pT92AAAP
