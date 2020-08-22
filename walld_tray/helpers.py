@@ -3,6 +3,8 @@ import requests
 from requests import get
 from collections import namedtuple
 # from config import log
+from PyQt5 import QtGui, QtCore
+
 
 def api_talk_handler(function):
     def wrapper(*args, **kwargs):
@@ -25,3 +27,16 @@ def download(url, file_name):
     return file_name
 
 SubCat = namedtuple('SubCat', ['name', 'checked'])
+
+
+def clear_layout(layout):
+    # layout = self.RightMenu
+    for i in reversed(range(layout.count())):
+        layout.itemAt(i).widget().hide()
+
+
+def b64_to_icon(base64: bytes) -> QtGui.QIcon:
+    pixmap = QtGui.QPixmap()
+    pixmap.loadFromData(QtCore.QByteArray.fromBase64(base64))
+    icon = QtGui.QIcon(pixmap)
+    return icon

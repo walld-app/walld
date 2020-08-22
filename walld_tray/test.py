@@ -1,33 +1,36 @@
 import sys
 from functools import partial
 
-from PyQt5 import uic
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QPushButton,
-                             QWidget, QSpacerItem, QSizePolicy)
-from src.core import Walld
-from src.config import API
+from PyQt5 import uic, QtGui
+from PyQt5.QtWidgets import (QAction, QApplication, QMainWindow, QMenu, QPushButton,
+                             QWidget, QSpacerItem, QSizePolicy, QSystemTrayIcon
+                             )
+from core import Walld
+from config import API, ICON
 from PyQt5.QtCore import QSize
+from pathlib import Path
+from helpers import b64_to_icon, clear_layout
+
+TEMPLATE_DIR = Path('.') / "template"
 
 
 class CategoryWidget(QWidget):
     def __init__(self):
         super().__init__()
-        uic.loadUi('src/template/category_widget.ui', self)
-
-
-def clear_layout(layout):
-    # layout = self.RightMenu
-    for i in reversed(range(layout.count())):
-        layout.itemAt(i).widget().hide()
+        uic.loadUi(TEMPLATE_DIR / "category_widget.ui", self)
 
 
 class Ui(QMainWindow):
-    def __init__(self, walld):
+    def __init__(self, walld, icon: QtGui.QIcon):
         super().__init__()
-        uic.loadUi('src/template/settings.ui', self) # Load the .ui file
-        self.show() # Show the GUI
+        uic.loadUi(TEMPLATE_DIR / "settings.ui", self)  # Load the .ui file
+        #  self.show()  # Show the GUI
         self.category_widget = CategoryWidget()
         self.walld = walld
+        self.icon = icon
+        self.tray = QSystemTrayIcon()
+        self.tray.setIcon(self.icon)
+        self.tray.setVisible(True)
         self.categories = self.walld.get_categories_as_dict()
         self._gen_categories_buttons()
         self.RightMenu.addWidget(self.category_widget)
@@ -53,13 +56,8 @@ class Ui(QMainWindow):
         self.category_widget.CategoriesLayout.addSpacerItem(spacer)
 
     def bring_sub_categories(self, category):
-        # self.clear_layout(self.category_widget.SubCategoriesLayout)
         self.hide_buttons('sub_categories')
         for i in self.cats_buttons[category]['sub_categories']:
-            # self.category_widget.SubCategoriesLayout.addWidget(i)
-            # ll = QPushButton(i)
-            # ll.setMinimumSize(QSize(0, 40))
-            # ll.setCheckable(True)
             i.show()
 
     def hide_buttons(self, category):
@@ -82,22 +80,33 @@ class UiCtrl:
         """Connect signals and slots."""
         self.view.ColourButton.clicked.connect(self.view.category_widget.show)
         self.view.CategoriesButton.clicked.connect(self.view.category_widget.show)
-        self.view.TagButton.clicked.connect(partial(self.view.clear_layout, self.view.RightMenu))
+        self.view.TagButton.clicked.connect(partial(clear_layout, self.view.RightMenu))
         for i in self.view.cats_buttons:
             i = self.view.cats_buttons[i]['category']
             i.clicked.connect(partial(self.view.bring_sub_categories, i.text()))
 
 
-# def clearLayout(layout):
-#     while layout.count():
-#         child = layout.takeAt(0)
-#         if child.widget() is not None:
-#             child.widget().deleteLater()
-#         elif child.layout() is not None:
-#             clearLayout(child.layout())
+if __name__ == "__main__":
 
-walld_core = Walld(API)  # TODO Exception for not connecting
-app = QApplication(sys.argv)
-window = Ui(walld_core)
-UiCtrl(window, walld_core)
-app.exec_()
+    walld_core = Walld(API)  # TODO Exception for not connecting
+    app = QApplication(sys.argv)
+    app.setQuitOnLastWindowClosed(False)
+    icon = b64_to_icon(ICON)
+    window = Ui(walld_core, icon)
+    UiCtrl(window, walld_core)
+
+    menu = QMenu()
+    shut_down = QAction("Quit")
+    shut_down.triggered.connect(app.quit)
+
+    change_wallpaper = QAction("Change wallpaper")
+    # change_wallpaper.triggered.connect(walld.spin_dice)
+    settings = QAction("Settings")
+    settings.triggered.connect(window.show)
+
+    menu.addAction(change_wallpaper)
+    menu.addAction(settings)
+    menu.addAction(shut_down)
+    window.tray.setContextMenu(menu)
+
+    app.exec_()

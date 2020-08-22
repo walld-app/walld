@@ -14,13 +14,18 @@ from requests import get
 
 from helpers import download
 
-#stackoverflow.com/questions/1977694/how-can-i-change-my-desktop-background-with-python
+#  stackoverflow.com/questions/1977694/how-can-i-change-my-desktop-background-with-python
 
 MAIN_FOLDER = Path().home() / '.walld'
 URL_LOG = MAIN_FOLDER / 'walld.log' # get it from settings!
 
-class Walld():
-    '''this class represents almost all walld functions except trays one'''
+
+class Walld:
+    """
+    Class that works with walls and save files
+    Its doesnt matter which DE is useed, this
+    class provides abstraction for that
+    """
     def __init__(self, api, main_folder=MAIN_FOLDER):
         self.main_folder = main_folder
         self.api = api
@@ -35,17 +40,18 @@ class Walld():
         else:
             code = ("/usr/bin/env | /usr/bin/grep DESKTOP_SESSION= "
                     "| /usr/bin/awk -F= '{print $2}'")
-            self.desktop_environment = \
-            subprocess.check_output(code, shell=True).decode('ascii')#nosec, redo
+            self.desktop_environment = subprocess.check_output(code, shell=True).decode('ascii')  # nosec, redo
 
         self._sync_categories()
         # print('class walld started!')
         # log.info class walld started
 
     def save_image(self, name=None):
-        '''copy image to specific(if passed)
-           folder or to standart
-           self.save_path path'''
+        """
+        Copy image to specific(if passed)
+        folder or to standart
+        self.save_path path
+        """
         if name:
             shutil.copyfile(self.main_folder_temp, name)#nosec
             print('saved at ' + name)
@@ -57,7 +63,7 @@ class Walld():
             self.save_path = (f'{self.main_folder}/saved/'
                               f'{str(random.random())}.png') # nosec
 
-    def spin_dice(self):
+    def spin_dice(self):  # TODO rename
         '''making a list of urls by accessing a db, than sets wall'''
         new_url = self.get_urls()['url']
         # log.info(new_url)
@@ -87,7 +93,7 @@ class Walld():
                             'picture-uri', '"file://' + file_name + '"'])
 
         elif self.desktop_environment == 'cinnamon2d\n':
-            subprocess.run(['/usr/bin/gsettings', 'set',#nosec wont fix
+            subprocess.run(['/usr/bin/gsettings', 'set',  #nosec wont fix
                             'org.cinnamon.desktop.background',
                             'picture-uri', '"file://' + file_name + '"'])
 
@@ -140,7 +146,7 @@ class Walld():
 
     def get_categories(self):
         '''gets a list of all categories by api method'''
-        params = {"categories":""}
+        params = dict(categories="")
         req = get(self.api, params=params).json()
         ong = []
         for i in req['categories']:
@@ -148,7 +154,7 @@ class Walld():
             ong.append([l + '::sca_::' for l in req['categories'][i]])
         return ong
 
-    def get_categories_as_dict(self):
+    def get_categories_as_dict(self):  # make @property
         params = {"categories":""}
         request = get(self.api, params=params).json()
         return request['categories']

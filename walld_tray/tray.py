@@ -1,12 +1,17 @@
 #!/bin/python3
-'''Main script that sits in tray and calls walld for help'''
+"""
+Main script that sits in walld_tray
+and calls walld for help
+PYSIMPLEGUIQT VERSION
+OUTDATED!!
+"""
 import sys
 import argparse
 from PySimpleGUIQt import SystemTray, PopupGetFile
-import core
-import config
+from walld_tray.core import Walld
+from walld_tray.config import API
 
-walld = core.Walld(config.API, config.MAIN_FOLDER)
+walld = Walld(API)
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', action='store_true', help='change wallpaper')
 args = parser.parse_args()
@@ -24,7 +29,7 @@ menu_def = ['BLANK', ['Change wallpaper', '---', '&Save',
 TRAY = SystemTray(menu=menu_def, data_base64=config.ICON)
 
 def make_flip(item): # сразу лезть в файл настроек и там все менять?
-    '''operates with settings and updates tray with dots'''
+    '''operates with settings and updates walld_tray with dots'''
     # далее вызывать tray_update()
     if 'sca_' in item:
         place = 5
@@ -71,7 +76,7 @@ def restore_settings():
     TRAY.Update(menu=menu_def)
 
 def tray_start():
-    '''main funcrion, starts tray'''
+    '''main funcrion, starts walld_tray'''
     restore_settings()
     while True:  # The event loop
         menu_item = TRAY.Read()
