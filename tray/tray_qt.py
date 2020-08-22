@@ -4,8 +4,8 @@ from PyQt5 import QtCore, QtGui
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QAction, QApplication, QMenu, QSystemTrayIcon
 
-from config import API, ICON, MAIN_FOLDER
-from core import Walld
+from .config import API, ICON
+from .core import Walld
 
 app = QApplication(argv)
 app.setQuitOnLastWindowClosed(False)
@@ -17,6 +17,7 @@ def b64_to_icon(base64):
     pixmap.loadFromData(QtCore.QByteArray.fromBase64(base64))
     ico = QtGui.QIcon(pixmap)
     return ico
+
 
 icon = QIcon(b64_to_icon(ICON))
 
@@ -45,7 +46,7 @@ change_wallpaper = QAction("Change wallpaper")
 change_wallpaper.triggered.connect(walld.spin_dice)
 settings = QAction("Settings")
 # change_wallpaper.triggered.connect(_
-#cates = gen_menu()
+# cates = gen_menu()
 
 menu.addAction(change_wallpaper)
 menu.addAction(settings)

@@ -3,3 +3,4 @@
 /src/__*
 db.db
 .vscode
+.idea

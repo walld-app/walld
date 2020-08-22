@@ -4,8 +4,8 @@ from functools import partial
 from PyQt5 import uic
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QPushButton,
                              QWidget, QSpacerItem, QSizePolicy)
-from core import Walld
-from config import API
+from src.core import Walld
+from src.config import API
 from PyQt5.QtCore import QSize
 
 
@@ -13,6 +13,12 @@ class CategoryWidget(QWidget):
     def __init__(self):
         super().__init__()
         uic.loadUi('src/template/category_widget.ui', self)
+
+
+def clear_layout(layout):
+    # layout = self.RightMenu
+    for i in reversed(range(layout.count())):
+        layout.itemAt(i).widget().hide()
 
 
 class Ui(QMainWindow):
@@ -62,11 +68,6 @@ class Ui(QMainWindow):
             for i in self.cats_buttons[l].get(category, []):
                 i.hide()
 
-    def clear_layout(self, layout):
-        # layout = self.RightMenu
-        for i in reversed(range(layout.count())):
-            layout.itemAt(i).widget().hide()
-
 
 class UiCtrl:
     """Ui Controller class."""
@@ -75,9 +76,9 @@ class UiCtrl:
         self.view = view
         self.walld = walld
         # Connect signals and slots
-        self._connectSignals()
+        self._connect_signals()
 
-    def _connectSignals(self):
+    def _connect_signals(self):
         """Connect signals and slots."""
         self.view.ColourButton.clicked.connect(self.view.category_widget.show)
         self.view.CategoriesButton.clicked.connect(self.view.category_widget.show)
@@ -95,8 +96,8 @@ class UiCtrl:
 #         elif child.layout() is not None:
 #             clearLayout(child.layout())
 
-walld = Walld(API) # TODO Exception for not connecting
+walld_core = Walld(API)  # TODO Exception for not connecting
 app = QApplication(sys.argv)
-window = Ui(walld)
-UiCtrl(window, walld)
+window = Ui(walld_core)
+UiCtrl(window, walld_core)
 app.exec_()
