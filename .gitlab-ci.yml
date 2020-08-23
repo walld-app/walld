@@ -1,7 +1,7 @@
 
 stages:
     # - test
-    - go_docker_hub
+    - test
 
 #   - python -V  # Print out python version for debugging
 #   - apk add py3-pip wget zip
@@ -33,12 +33,12 @@ stages:
 #     - cd ../test
 #     - pytest
 
-go_docker_hub:
-    stage: go_docker_hub
+test:
+    stage: test
     script: # VENV!
     - dir
     - pip3 install -r requirements.txt
     - pip3 install pyinstaller
-    - pyinstaller --onefile --noconsole src/tray_qt.py
+    - pyinstaller --onefile --noconsole src/test.py
     tags:
     - windows_7
