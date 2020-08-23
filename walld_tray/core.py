@@ -8,10 +8,8 @@ should store here
 """
 import ctypes  # MANY THANKS TO J.J AND MESKSR DUDES YOU SAVED MY BURNED UP ASS
 import json
-import os
-import random
+from random import random, choice
 import shutil
-import subprocess
 from pathlib import Path
 
 from requests import get
@@ -58,51 +56,38 @@ class Walld:
             shutil.copyfile(self.main_folder_temp, self.save_path)  # nosec wont fix
             print('saved at ' + self.save_path)  # TODO REDO
             self.save_path = (f'{self.main_folder}/saved/'
-                              f'{str(random.random())}.png')  # nosec
+                              f'{str(random())}.png')  # nosec
 
-    def set_wall_from_api(self):  # TODO rename
+    def set_wall(self):  # TODO rename
         """making a list of urls by accessing a db, than sets wall"""
         url = self.get_url()['url']
         # log.info(url)
         file_name = download(url, self.main_folder / 'temp.jpg')
         self.de.set_wall(file_name)
 
-    # def _get_checked_categories(self):
-    #     result = []
-    #     for category in self.categories:
-    #         for sub_category in category:
-    #             if sub_category["checked"]:
+    def _get_checked_categories(self):
+        result = {}
+        for category in self.categories:
+            for sub_category in self.categories[category]:
+                if sub_category["checked"]:
+                    if not result.get(category):
+                        result[category] = []
+                    result[category].append(sub_category["name"])
+        return result
 
-    def get_url(self):  # TODO REDO
+    def get_url(self):  # TODO api talker decorator
         """
         Requests new link for wallpaper
         """
-        params = []
-        # TODO Get checked categories
-        if self.filer.settings['categories']:
-            print(self.filer.settings['categories'])
-            cat = random.choice(list(self.filer.settings['categories'].keys()))  # nosec
-            sub_cat = random.choice(self.filer.settings['categories'][cat])  # nosec
-            params.append(("category", cat))
-            params.append(('sub_category', sub_cat))
-        if not params:
-            params = {}
-        answer = get(self.api + '/walls', params=params)
-        result = answer.json()
-        if answer.status_code == 200:
-            print(params)
-        else:
-            print('here the params', params)
-            if answer.status_code == '404':
-                print('SERVER ANSWERS 404 ON', answer.url)
-            if answer.status_code == '403':
-                print('SERVER ANSWERS 403 ON', answer.url)
-            result = answer.status_code
-        return result
+        params = dict()
+        if self.categories:
+            checked_cats = self._get_checked_categories()
+            cat = choice(list(checked_cats.keys()))
+            sub_cat = choice(checked_cats[cat])
+            params = dict(category=cat, sub_category=sub_cat)
 
-    # def get_settings(self): # DAFUCKKK
-    #     '''gets list of settings'''
-    #     return self.filer.settings
+        answer = get(self.api + '/walls', params=params)
+        return answer.json()
 
     @property
     def _api_get_categories(self):

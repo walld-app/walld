@@ -8,7 +8,8 @@ from PyQt5 import QtGui, QtCore
 import subprocess
 import ctypes
 
-def api_talk_handler(function):
+
+def api_talk_handler(function):  # TODO retry, exceptions for http errors
     def wrapper(*args, **kwargs):
         for _ in range(5):
             try:

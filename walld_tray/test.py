@@ -109,7 +109,7 @@ if __name__ == "__main__":
     shut_down.triggered.connect(app.quit)
 
     change_wallpaper = QAction("Change wallpaper")
-    # change_wallpaper.triggered.connect(walld.spin_dice)
+    change_wallpaper.triggered.connect(walld_core.set_wall)
     settings = QAction("Settings")
     settings.triggered.connect(window.show)
 
