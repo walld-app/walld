@@ -8,10 +8,11 @@ should store here
 """
 import ctypes  # MANY THANKS TO J.J AND MESKSR DUDES YOU SAVED MY BURNED UP ASS
 import json
-from random import random, choice
+from random import choice
 import shutil
+from uuid import uuid4
 from pathlib import Path
-
+from typing import Optional
 from requests import get
 
 from helpers import download, DesktopEnvironment
@@ -42,21 +43,17 @@ class Walld:
         self.connected = True
         # log.debug('class walld started')
 
-    def save_image(self, name=None):
+    def save_image(self, path: Optional[Path] = None):
         """
         Copy image to specific(if passed)
-        folder or to standart
+        folder or to standard
         self.save_path path
         """
-        if name:
-            shutil.copyfile(self.temp_wall, name)  # nosec
-            # log.info(f'Saved at {name})
+        if not path:
+            path = self.save_path / f"{str(uuid4())}.png"
 
-        else:
-            shutil.copyfile(self.main_folder_temp, self.save_path)  # nosec wont fix
-            print('saved at ' + self.save_path)  # TODO REDO
-            self.save_path = (f'{self.main_folder}/saved/'
-                              f'{str(random())}.png')  # nosec
+        shutil.copyfile(self.temp_wall, path)  # nosec wont fix
+        # log.info(f"saved at {path}")  # TODO
 
     def set_wall(self):  # TODO rename
         """making a list of urls by accessing a db, than sets wall"""
