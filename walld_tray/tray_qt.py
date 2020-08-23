@@ -43,7 +43,7 @@ shut_down = QAction("Quit")
 shut_down.triggered.connect(app.quit)
 
 change_wallpaper = QAction("Change wallpaper")
-change_wallpaper.triggered.connect(walld.spin_dice)
+change_wallpaper.triggered.connect(walld.set_wall_from_api)
 settings = QAction("Settings")
 # change_wallpaper.triggered.connect(_
 # cates = gen_menu()

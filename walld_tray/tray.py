@@ -18,7 +18,7 @@ args = parser.parse_args()
 
 if args.c:
     print(args.c)
-    walld.spin_dice()
+    walld.set_wall_from_api()
     sys.exit()
 
 #'Resolution', ['16:9::res_', '16:10::res_', '21:9::res_']
@@ -92,7 +92,7 @@ def tray_start():
             walld.save_image(apath)
 
         elif menu_item in ('__ACTIVATED__', 'Change wallpaper'):
-            walld.spin_dice()
+            walld.set_wall_from_api()
 
         elif ('cat_' in menu_item or 'res_' in menu_item or 'sca_' in menu_item):
             print('aha')

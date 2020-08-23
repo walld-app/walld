@@ -4,3 +4,7 @@
 db.db
 .vscode
 .idea
+!/.python-version
+.python-version
+walld_tray/.python-version
+walld_tray/__pycache__/

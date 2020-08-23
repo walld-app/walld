@@ -1,5 +1,6 @@
 import sys
 from functools import partial
+from typing import Any, Union
 
 from PyQt5 import uic, QtGui
 from PyQt5.QtWidgets import (QAction, QApplication, QMainWindow, QMenu, QPushButton,
@@ -11,7 +12,7 @@ from PyQt5.QtCore import QSize
 from pathlib import Path
 from helpers import b64_to_icon, clear_layout
 
-TEMPLATE_DIR = Path('.') / "template"
+TEMPLATE_DIR: Union[Path, Any] = Path('.') / "template"
 
 
 class CategoryWidget(QWidget):
@@ -26,12 +27,11 @@ class Ui(QMainWindow):
         uic.loadUi(TEMPLATE_DIR / "settings.ui", self)  # Load the .ui file
         #  self.show()  # Show the GUI
         self.category_widget = CategoryWidget()
-        self.walld = walld
+        self.walld = walld  # TODO it will crash if walld is not connected to a service
         self.icon = icon
         self.tray = QSystemTrayIcon()
         self.tray.setIcon(self.icon)
         self.tray.setVisible(True)
-        self.categories = self.walld.get_categories_as_dict()
         self._gen_categories_buttons()
         self.RightMenu.addWidget(self.category_widget)
         self.category_widget.hide()
@@ -39,15 +39,16 @@ class Ui(QMainWindow):
     def _gen_categories_buttons(self):
         self.cats_buttons = {}
         spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-        for i in self.categories:
+        for i in self.walld.categories:
             ll = QPushButton(i)
             ll.setMinimumSize(QSize(0, 40))
-            self.cats_buttons[i] = {'category': ll, 'sub_categories': []}
-            # make for loop for iterating over sub categ
-            for l in self.categories[i]:
-                sub_category_button = QPushButton(l)
+            self.cats_buttons[i] = dict(category=ll, sub_categories=[])
+            # make for loop for iterating over sub category
+            for sub_category in self.walld.categories[i]:
+                sub_category_button = QPushButton(sub_category['name'])
                 sub_category_button.setMinimumSize(QSize(0, 40))
                 sub_category_button.setCheckable(True)
+                sub_category_button.setChecked(sub_category['checked'])
                 self.cats_buttons[i]['sub_categories'].append(sub_category_button)
                 self.category_widget.SubCategoriesLayout.addWidget(sub_category_button)
                 sub_category_button.hide()
@@ -61,9 +62,8 @@ class Ui(QMainWindow):
             i.show()
 
     def hide_buttons(self, category):
-        print(self.cats_buttons, 'shiet')
-        for l in self.cats_buttons:
-            for i in self.cats_buttons[l].get(category, []):
+        for button in self.cats_buttons:
+            for i in self.cats_buttons[button].get(category, []):
                 i.hide()
 
 
@@ -91,8 +91,7 @@ if __name__ == "__main__":
     walld_core = Walld(API)  # TODO Exception for not connecting
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
-    icon = b64_to_icon(ICON)
-    window = Ui(walld_core, icon)
+    window = Ui(walld_core, b64_to_icon(ICON))
     UiCtrl(window, walld_core)
 
     menu = QMenu()
