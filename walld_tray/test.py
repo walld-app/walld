@@ -66,13 +66,20 @@ class Ui(QMainWindow):
             for i in self.cats_buttons[button].get(category, []):
                 i.hide()
 
+    def check_button(self, category, button):  # TODO REDO
+        for num, i in enumerate(self.walld.prefs_in_mem['categories'][category]):
+            if i['name'] == button.text():
+                self.walld.prefs_in_mem['categories'][category][num]['checked'] = button.isChecked()
+                break
+
+        self.walld.prefs = self.walld.prefs_in_mem
+
 
 class UiCtrl:
     """Ui Controller class."""
-    def __init__(self, view, walld):
+    def __init__(self, view):
         """Controller initializer."""
         self.view = view
-        self.walld = walld
         # Connect signals and slots
         self._connect_signals()
 
@@ -81,18 +88,21 @@ class UiCtrl:
         self.view.ColourButton.clicked.connect(self.view.category_widget.show)
         self.view.CategoriesButton.clicked.connect(self.view.category_widget.show)
         self.view.TagButton.clicked.connect(partial(clear_layout, self.view.RightMenu))
+
         for i in self.view.cats_buttons:
-            i = self.view.cats_buttons[i]['category']
-            i.clicked.connect(partial(self.view.bring_sub_categories, i.text()))
+            button = self.view.cats_buttons[i]['category']
+            button.clicked.connect(partial(self.view.bring_sub_categories, button.text()))
+            sub_categories_buttons = self.view.cats_buttons[i]['sub_categories']
+            for sc_button in sub_categories_buttons:
+                sc_button.clicked.connect(partial(self.view.check_button, button.text(), sc_button))
 
 
 if __name__ == "__main__":
-
     walld_core = Walld(API)  # TODO Exception for not connecting
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
     window = Ui(walld_core, b64_to_icon(ICON))
-    UiCtrl(window, walld_core)
+    UiCtrl(window)
 
     menu = QMenu()
     shut_down = QAction("Quit")

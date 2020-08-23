@@ -26,26 +26,23 @@ URL_LOG = MAIN_FOLDER / 'walld.log'  # get it from settings!
 
 class Walld:
     """
-    Class that works with walls and save files
-    Its doesnt matter which DE is useed, this
-    class provides abstraction for that
+    Class that works with walls, api and also save files
+    It doesnt matter which DE is used, this
+    class contains abstraction for that
     """
 
     def __init__(self, api, main_folder=MAIN_FOLDER):
         self.main_folder = main_folder
         self.api = api
         self.prefs_path = self.main_folder / 'prefs.json'
+        self.prefs_in_mem = self.prefs  # TODO REDO
+        self.save_path = self.main_folder / 'saved'
+        self.temp_wall = self.main_folder / 'temp.jpg'
         self.categories = self.prefs.get('categories')
         self._sync_categories()
         self.de = DesktopEnvironment()
         self.connected = True
-
-        # self.save_path = (self.main_folder+'/saved/' +
-        #                   str(random.random()) + '.png')#nosec
-
-        self._sync_categories()
-        # print('class walld started!')
-        # log.info class walld started
+        # log.debug('class walld started')
 
     def save_image(self, name=None):
         """
@@ -54,12 +51,12 @@ class Walld:
         self.save_path path
         """
         if name:
-            shutil.copyfile(self.main_folder_temp, name)  # nosec
-            print('saved at ' + name)
+            shutil.copyfile(self.temp_wall, name)  # nosec
+            # log.info(f'Saved at {name})
 
         else:
             shutil.copyfile(self.main_folder_temp, self.save_path)  # nosec wont fix
-            print('saved at ' + self.save_path)
+            print('saved at ' + self.save_path)  # TODO REDO
             self.save_path = (f'{self.main_folder}/saved/'
                               f'{str(random.random())}.png')  # nosec
 
@@ -81,7 +78,7 @@ class Walld:
         Requests new link for wallpaper
         """
         params = []
-        #  Get checked categories
+        # TODO Get checked categories
         if self.filer.settings['categories']:
             print(self.filer.settings['categories'])
             cat = random.choice(list(self.filer.settings['categories'].keys()))  # nosec
@@ -132,8 +129,9 @@ class Walld:
 
     @prefs.setter
     def prefs(self, value):
+        pretty_json = json.dumps(value, indent=2)
         with self.prefs_path.open('w') as file:
-            json.dump(file, value)
+            file.write(pretty_json)
 
     # @property
     # def categories(self):
@@ -147,7 +145,7 @@ class Walld:
         """
         Update self categories
         with new one`s from api if any
-        and dump it to settings json
+        Dump them to settings json file
         """
         for key, value in self._api_get_categories.items():
             if key not in self.categories:
@@ -158,34 +156,7 @@ class Walld:
                     sub_category_prefs = dict(name=sub_cat, checked=False)
                     self.categories[key].append(sub_category_prefs)
 
-        with self.prefs_path.open('w') as file:
-            json.dump(self.categories, file)
-
-
-class Filer():  # TODO rewrite to PAth
-    '''Abstraction for files and settings'''
-
-    def __init__(self):
-        self.main_folder = main_folder
-
-        if not os.path.exists(self.main_folder):
-            print("can`t see " \
-                  + self.main_folder + " folder!")
-            os.mkdir(self.main_folder)
-
-        if not os.path.exists(self.main_folder):
-            print('creating!' + self.main_folder)
-            os.mkdir(self.main_folder)
-
-        if not os.path.exists(self.main_folder + '/saved/'):
-            print('creating!' + self.main_folder + '/saved/')
-            os.mkdir(self.main_folder + '/saved/')
-        print('checking options!')
-        try:
-            with open(self.settings_file, 'r') as file:
-                self.settings = json.load(file)
-        except FileNotFoundError:
-            print('file not found! creating new one')
-            self.settings = {'categories': {}, 'resolutions': []}
+        self.prefs_in_mem['categories'] = self.categories
+        self.prefs = self.prefs_in_mem
 
     # TODO logger to file
