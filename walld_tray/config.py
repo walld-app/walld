@@ -1,7 +1,42 @@
 from os.path import expanduser
+from logging import getLogger, StreamHandler, FileHandler, Formatter
+from os import getenv
+import sys
+from pathlib import Path
 
-HOME = expanduser("~")
-API = "http://127.0.0.1:8080/v1"
+WALLD_DIR = Path(__file__).parent
+
+try:
+    # noinspection PyUnresolvedReferences,PyPackageRequirements
+    from dotenv import load_dotenv
+    load_dotenv(WALLD_DIR.parent / '.env')
+except ImportError:
+    pass
+
+
+MAIN_FOLDER = Path().home() / '.walld'
+SYS_LOG_PATH = MAIN_FOLDER / 'sys.log'
+WALLPAPER_LOG_PATH = MAIN_FOLDER / 'wallpaper.log'
+API = getenv("API", "https://api.walld.kz159.ru/8080/v1")
+
+_log_formatter = Formatter("%(asctime)s [%(levelname)-5.5s] - %(message)s")
+
+log = getLogger('walld_tray')
+wallpaper_log = getLogger('walld_tray_user')
+
+sys_file_handler = FileHandler(SYS_LOG_PATH)
+sys_file_handler.setFormatter(_log_formatter)
+log.addHandler(sys_file_handler)
+log.setLevel(getenv("LOG_LEVEL", "DEBUG"))
+
+wall_file_handler = FileHandler(WALLPAPER_LOG_PATH)
+wall_file_handler.setFormatter(_log_formatter)
+wallpaper_log.addHandler(wall_file_handler)
+wallpaper_log.setLevel("INFO")
+
+log.info("got this vars!\n"
+         f"API - {API}")
+
 
 ICON = '''
 iVBORw0KGgoAAAANSUhEUgAAAJ8AAACiCAYAAABf/x+TAAAACXBIWXMAAC4jAAAuIwF4pT92AAAP

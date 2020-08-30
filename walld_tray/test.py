@@ -1,15 +1,16 @@
 import sys
 from functools import partial
+from pathlib import Path
 from typing import Any, Union
 
-from PyQt5 import uic, QtGui
-from PyQt5.QtWidgets import (QAction, QApplication, QMainWindow, QMenu, QPushButton,
-                             QWidget, QSpacerItem, QSizePolicy, QSystemTrayIcon
-                             )
-from core import Walld
-from config import API, ICON
+from PyQt5 import QtGui, uic
 from PyQt5.QtCore import QSize
-from pathlib import Path
+from PyQt5.QtWidgets import (QAction, QApplication, QMainWindow, QMenu, QPushButton, QSizePolicy, QSpacerItem,
+                             QSystemTrayIcon, QWidget
+                             )
+
+from config import API, ICON
+from core import Walld
 from helpers import b64_to_icon, clear_layout
 
 TEMPLATE_DIR: Union[Path, Any] = Path('.') / "template"
@@ -118,4 +119,4 @@ if __name__ == "__main__":
     menu.addAction(shut_down)
     window.tray.setContextMenu(menu)
 
-    app.exec_()
+    sys.exit(app.exec_())

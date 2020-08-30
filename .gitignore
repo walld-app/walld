@@ -8,3 +8,4 @@ db.db
 .python-version
 walld_tray/.python-version
 walld_tray/__pycache__/
+.env
