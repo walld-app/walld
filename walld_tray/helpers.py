@@ -1,12 +1,12 @@
 # TODO 500/404 handler
+import ctypes  # MANY THANKS TO J.J AND MESKSR DUDES YOU SAVED MY BURNED UP ASS
 import platform
+import subprocess
 
 import requests
-from requests import get
 # from config import log
-from PyQt5 import QtGui, QtCore
-import subprocess
-import ctypes
+from PyQt5 import QtCore, QtGui
+from requests import get
 
 
 def api_talk_handler(function):  # TODO retry, exceptions for http errors

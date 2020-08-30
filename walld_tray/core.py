@@ -6,16 +6,17 @@ all functions related to:
  = working with files
 should store here
 """
-import ctypes  # MANY THANKS TO J.J AND MESKSR DUDES YOU SAVED MY BURNED UP ASS
+
 import json
-from random import choice
 import shutil
-from uuid import uuid4
 from pathlib import Path
+from random import choice
 from typing import Optional
+from uuid import uuid4
+
 from requests import get
 
-from helpers import download, DesktopEnvironment
+from helpers import DesktopEnvironment, download
 
 #  stackoverflow.com/questions/1977694/how-can-i-change-my-desktop-background-with-python
 
@@ -115,21 +116,19 @@ class Walld:
         with self.prefs_path.open('w') as file:
             file.write(pretty_json)
 
-    # @property
-    # def categories(self):
-    #     return self.prefs['categories']
-
-    # @categories.setter
-    # def categories(self, value):
-    #     with self.prefs_path.open('w') as file:
-
     def _sync_categories(self):
         """
         Update self categories
         with new one`s from api if any
         Dump them to settings json file
         """
-        for key, value in self._api_get_categories.items():
+        api_categories = self._api_get_categories.items()
+
+        for key in list(self.categories.keys()):
+            if key not in api_categories:
+                del self.categories[key]
+
+        for key, value in api_categories:
             if key not in self.categories:
                 self.categories[key] = []
 
@@ -137,8 +136,5 @@ class Walld:
                 if sub_cat not in [i['name'] for i in self.categories[key]]:
                     sub_category_prefs = dict(name=sub_cat, checked=False)
                     self.categories[key].append(sub_category_prefs)
-
         self.prefs_in_mem['categories'] = self.categories
         self.prefs = self.prefs_in_mem
-
-    # TODO logger to file

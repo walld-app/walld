@@ -5,11 +5,13 @@ and calls walld for help
 PYSIMPLEGUIQT VERSION
 OUTDATED!!
 """
-import sys
 import argparse
-from PySimpleGUIQt import SystemTray, PopupGetFile
-from walld_tray.core import Walld
+import sys
+
+from PySimpleGUIQt import PopupGetFile, SystemTray
+
 from walld_tray.config import API
+from walld_tray.core import Walld
 
 walld = Walld(API)
 parser = argparse.ArgumentParser()
