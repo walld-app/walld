@@ -2,11 +2,13 @@
 import ctypes  # MANY THANKS TO J.J AND MESKSR DUDES YOU SAVED MY BURNED UP ASS
 import platform
 import subprocess
+from pathlib import Path
 
 import requests
-# from config import log
 from PyQt5 import QtCore, QtGui
 from requests import get
+
+from config import log
 
 
 def api_talk_handler(function):  # TODO retry, exceptions for http errors
@@ -22,22 +24,35 @@ def api_talk_handler(function):  # TODO retry, exceptions for http errors
     return wrapper
 
 
-def download(url, file_name):
-    '''downloads a file, first comes url, second comes full path of file'''
-    with open(file_name, "wb") as file:
+def download(url: str, file_name: Path) -> Path:
+    """
+    Downloads file to specified location
+    :param url: url of file
+    :param file_name filepath WITH name to save
+    """
+    try:
+        response = get(url)
+    except requests.exceptions.ConnectionError:
         url = url.replace('s', '', 1)
         response = get(url)
+
+    with open(file_name, "wb") as file:
         file.write(response.content)
     return file_name
 
 
 def clear_layout(layout):
-    # layout = self.RightMenu
+    """
+    Clears qt layout from widgets
+    """
     for i in reversed(range(layout.count())):
         layout.itemAt(i).widget().hide()
 
 
 def b64_to_icon(base64: bytes) -> QtGui.QIcon:
+    """
+    Converts base64 code to QtGui icon
+    """
     pixmap = QtGui.QPixmap()
     pixmap.loadFromData(QtCore.QByteArray.fromBase64(base64))
     icon = QtGui.QIcon(pixmap)
@@ -47,8 +62,9 @@ def b64_to_icon(base64: bytes) -> QtGui.QIcon:
 class DesktopEnvironment:
     def __init__(self):
         self.name: str
-        self.current_wallpaper: str # not implemented
+        self.current_wallpaper: str  # not implemented
         self._detect_desktop_environment()
+        log.debug(f"DE - {self.name}")
 
     def _detect_desktop_environment(self):
         if platform.system() == 'Windows':  # Here comes windows specific stuff
@@ -59,7 +75,7 @@ class DesktopEnvironment:
                     "| /usr/bin/awk -F= '{print $2}'")
             self.name = subprocess.check_output(code, shell=True).decode('ascii').rstrip().lower()
 
-    def set_wall(self, file_name: str):
+    def set_wall(self, file_name: Path):
         """
         Function that, depending on DE, sets walls'''
         """

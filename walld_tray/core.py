@@ -13,15 +13,12 @@ from pathlib import Path
 from random import choice
 from typing import Optional
 from uuid import uuid4
-
+from config import log, wallpaper_log, MAIN_FOLDER
 from requests import get
 
 from helpers import DesktopEnvironment, download
 
 #  stackoverflow.com/questions/1977694/how-can-i-change-my-desktop-background-with-python
-
-MAIN_FOLDER = Path().home() / '.walld'
-URL_LOG = MAIN_FOLDER / 'walld.log'  # get it from settings!
 
 
 class Walld:
@@ -42,7 +39,7 @@ class Walld:
         self._sync_categories()
         self.de = DesktopEnvironment()
         self.connected = True
-        # log.debug('class walld started')
+        log.debug('class walld started')
 
     def save_image(self, path: Optional[Path] = None):
         """
@@ -54,12 +51,12 @@ class Walld:
             path = self.save_path / f"{str(uuid4())}.png"
 
         shutil.copyfile(self.temp_wall, path)  # nosec wont fix
-        # log.info(f"saved at {path}")  # TODO
+        log.info(f"saved at {path}")
 
-    def set_wall(self):  # TODO rename
+    def set_wall(self):
         """making a list of urls by accessing a db, than sets wall"""
         url = self.get_url()['url']
-        # log.info(url)
+        wallpaper_log.info(f"Setting up wallpaper from {url}")
         file_name = download(url, self.main_folder / 'temp.jpg')
         self.de.set_wall(file_name)
 
@@ -123,10 +120,16 @@ class Walld:
         Dump them to settings json file
         """
         api_categories = self._api_get_categories.items()
-
-        for key in list(self.categories.keys()):
+        categories_clone = self.categories.copy()  # TODO REDO
+        sub_cats = [i[1][0] for i in api_categories]
+        for key, value in categories_clone.items():
             if key not in api_categories:
+                log.warning(f"{key} is not found in api response, is everything okay?")
                 del self.categories[key]
+            for i in value:
+                if i['name'] not in sub_cats:
+                    pass
+                    # index = self.categories[key][]  # TODO delete subcat if it`s not presented
 
         for key, value in api_categories:
             if key not in self.categories:
@@ -136,5 +139,6 @@ class Walld:
                 if sub_cat not in [i['name'] for i in self.categories[key]]:
                     sub_category_prefs = dict(name=sub_cat, checked=False)
                     self.categories[key].append(sub_category_prefs)
+
         self.prefs_in_mem['categories'] = self.categories
         self.prefs = self.prefs_in_mem
