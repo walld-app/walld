@@ -23,14 +23,18 @@ _log_formatter = Formatter("%(asctime)s [%(levelname)-5.5s] - %(message)s")
 
 log = getLogger('walld_tray')
 wallpaper_log = getLogger('walld_tray_user')
+stdout_handler = StreamHandler(sys.stdout)
+stdout_handler.setFormatter(_log_formatter)
 
 sys_file_handler = FileHandler(SYS_LOG_PATH)
 sys_file_handler.setFormatter(_log_formatter)
 log.addHandler(sys_file_handler)
+log.addHandler(stdout_handler)
 log.setLevel(getenv("LOG_LEVEL", "DEBUG"))
 
 wall_file_handler = FileHandler(WALLPAPER_LOG_PATH)
 wall_file_handler.setFormatter(_log_formatter)
+wallpaper_log.addHandler(stdout_handler)
 wallpaper_log.addHandler(wall_file_handler)
 wallpaper_log.setLevel("INFO")
 
