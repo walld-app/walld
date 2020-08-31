@@ -57,8 +57,8 @@ class Walld:
         """making a list of urls by accessing a db, than sets wall"""
         url = self.get_url()['url']
         wallpaper_log.info(f"Setting up wallpaper from {url}")
-        file_name = download(url, self.main_folder / 'temp.jpg')
-        self.de.set_wall(file_name)
+        file = download(url, self.main_folder / 'temp.jpg')
+        self.de.set_wall(file)
 
     def _get_checked_categories(self):
         result = {}
@@ -113,25 +113,31 @@ class Walld:
         with self.prefs_path.open('w') as file:
             file.write(pretty_json)
 
+    @staticmethod
+    def _find_index(cat: list, name: str):
+        for num, i in enumerate(cat):
+            if i['name'] == name:
+                return num
+
     def _sync_categories(self):
         """
         Update self categories
         with new one`s from api if any
         Dump them to settings json file
         """
-        api_categories = self._api_get_categories.items()
+        api_categories = self._api_get_categories
         categories_clone = self.categories.copy()  # TODO REDO
-        sub_cats = [i[1][0] for i in api_categories]
+        sub_cats = [i[1][0] for i in api_categories.items()]
         for key, value in categories_clone.items():
             if key not in api_categories:
                 log.warning(f"{key} is not found in api response, is everything okay?")
                 del self.categories[key]
             for i in value:
                 if i['name'] not in sub_cats:
-                    pass
-                    # index = self.categories[key][]  # TODO delete subcat if it`s not presented
+                    index = self._find_index(self.categories[key], i['name'])  # TODO delete subcat if it`s not presented
+                    del self.categories[key][index]
 
-        for key, value in api_categories:
+        for key, value in api_categories.items():
             if key not in self.categories:
                 self.categories[key] = []
 
