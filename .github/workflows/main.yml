@@ -22,7 +22,7 @@ jobs:
         run: pip3 install -r requirements.txt
         
       - name: make executable
-        run: pyinstaller walld_tray/main.py --onefile
+        run: pyinstaller walld_tray/main.py --onefile -n walld
       
       - uses: actions/upload-artifact@v2
         with:
