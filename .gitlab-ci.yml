@@ -39,6 +39,6 @@ test:
     - dir
     - pip3 install -r requirements.txt
     - pip3 install pyinstaller
-    - pyinstaller --onefile --noconsole walld_tray/test.py
+    - pyinstaller --onefile --noconsole walld_tray/main.py
     tags:
     - windows_7
