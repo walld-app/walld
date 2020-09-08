@@ -6,7 +6,7 @@ from typing import Any, Union
 from PyQt5 import QtGui, uic
 from PyQt5.QtCore import QSize
 from PyQt5.QtWidgets import (QAction, QApplication, QMainWindow, QMenu, QPushButton, QSizePolicy, QSpacerItem,
-                             QSystemTrayIcon, QWidget
+                             QSystemTrayIcon, QWidget, QFileDialog
                              )
 
 from config import API, ICON
@@ -22,12 +22,19 @@ class CategoryWidget(QWidget):
         uic.loadUi(TEMPLATE_DIR / "category_widget.ui", self)
 
 
+class SettingsSystem(QWidget):
+    def __init__(self):
+        super().__init__()
+        uic.loadUi(TEMPLATE_DIR / "settings_system.ui", self)
+
+
 class Ui(QMainWindow):
     def __init__(self, walld, icon: QtGui.QIcon):
         super().__init__()
         uic.loadUi(TEMPLATE_DIR / "settings.ui", self)  # Load the .ui file
         #  self.show()  # Show the GUI
         self.category_widget = CategoryWidget()
+        self.setting_system = SettingsSystem()
         self.walld = walld  # TODO it will crash if walld is not connected to a service
         self.icon = icon
         self.tray = QSystemTrayIcon()
@@ -35,32 +42,50 @@ class Ui(QMainWindow):
         self.tray.setVisible(True)
         self._gen_categories_buttons()
         self.RightMenu.addWidget(self.category_widget)
+        self.RightMenu.addWidget(self.setting_system)
         self.category_widget.hide()
+        self.setting_system.hide()
+        self.change_field_to_download_field()
 
     def _gen_categories_buttons(self):
         self.cats_buttons = {}
         spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
         for i in self.walld.categories:
+
             ll = QPushButton(i)
             ll.setMinimumSize(QSize(0, 40))
+
             self.cats_buttons[i] = dict(category=ll, sub_categories=[])
             # make for loop for iterating over sub category
+
             for sub_category in self.walld.categories[i]:
                 sub_category_button = QPushButton(sub_category['name'])
                 sub_category_button.setMinimumSize(QSize(0, 40))
                 sub_category_button.setCheckable(True)
                 sub_category_button.setChecked(sub_category['checked'])
+
                 self.cats_buttons[i]['sub_categories'].append(sub_category_button)
                 self.category_widget.SubCategoriesLayout.addWidget(sub_category_button)
+
                 sub_category_button.hide()
+
             self.category_widget.CategoriesLayout.addWidget(ll)
+
         self.category_widget.SubCategoriesLayout.addSpacerItem(spacer)
         self.category_widget.CategoriesLayout.addSpacerItem(spacer)
+
+    def change_field_to_download_field(self):
+        # TODO
+        self.setting_system.folder_path.setPlainText(str(self.walld.save_path))
 
     def bring_sub_categories(self, category):
         self.hide_buttons('sub_categories')
         for i in self.cats_buttons[category]['sub_categories']:
             i.show()
+
+    def show_(self, widget: QWidget):
+        clear_layout(self.RightMenu)
+        widget.show()
 
     def hide_buttons(self, category):
         for button in self.cats_buttons:
@@ -75,10 +100,15 @@ class Ui(QMainWindow):
 
         self.walld.prefs = self.walld.prefs_in_mem
 
+    def folder_button(self):
+        name, _ = QFileDialog.getOpenFileName(self, "Open File")
+        self.walld.prefs_in_mem['download_path'] = name
+        self.walld.dump_prefs()
+
 
 class UiCtrl:
     """Ui Controller class."""
-    def __init__(self, view):
+    def __init__(self, view: Ui):
         """Controller initializer."""
         self.view = view
         # Connect signals and slots
@@ -87,8 +117,10 @@ class UiCtrl:
     def _connect_signals(self):
         """Connect signals and slots."""
         self.view.ColourButton.clicked.connect(self.view.category_widget.show)
-        self.view.CategoriesButton.clicked.connect(self.view.category_widget.show)
+        self.view.CategoriesButton.clicked.connect(partial(self.view.show_, self.view.category_widget))
         self.view.TagButton.clicked.connect(partial(clear_layout, self.view.RightMenu))
+        self.view.SystemButton.clicked.connect(partial(self.view.show_, self.view.setting_system))
+        self.view.setting_system.choose_folder_button.clicked.connect(self.view.folder_button)
 
         for i in self.view.cats_buttons:
             button = self.view.cats_buttons[i]['category']
@@ -99,10 +131,10 @@ class UiCtrl:
 
 
 def main():
-    walld_core = Walld(API)  # TODO Exception for not connecting
+    walld = Walld(API)  # TODO Exception for not connecting
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
-    window = Ui(walld_core, b64_to_icon(ICON))
+    window = Ui(walld, b64_to_icon(ICON))
     UiCtrl(window)
 
     menu = QMenu()
@@ -110,7 +142,7 @@ def main():
     shut_down.triggered.connect(app.quit)
 
     change_wallpaper = QAction("Change wallpaper")
-    change_wallpaper.triggered.connect(walld_core.set_wall)
+    change_wallpaper.triggered.connect(walld.set_wall)
     settings = QAction("Settings")
     settings.triggered.connect(window.show)
 

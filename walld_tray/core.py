@@ -33,7 +33,7 @@ class Walld:
         self.api = api
         self.prefs_path = self.main_folder / 'prefs.json'
         self.prefs_in_mem = self.prefs  # TODO REDO
-        self.save_path = self.main_folder / 'saved'
+        self.save_path = self.main_folder / 'walls'
         self.temp_wall = self.main_folder / 'temp.jpg'
         self.categories = self.prefs.get('categories')
         self._sync_categories()
@@ -94,9 +94,13 @@ class Walld:
         request = get(self.api, params=params).json()
         return request['categories']
 
+    def dump_prefs(self):
+        self.prefs = self.prefs_in_mem
+
     @property
+    # TODO REDO
     def prefs(self):
-        base_settings = dict(categories=dict(), system=dict(), tags=dict())
+        base_settings = dict(categories=dict(), system=dict(save_path=self.save_path), tags=dict())
         if not self.prefs_path.exists():
             return base_settings
 
@@ -104,6 +108,7 @@ class Walld:
             loaded_prefs = json.load(file)
 
         if loaded_prefs.keys() != base_settings.keys():
+            log.error('JSON file was corrupted and will restore to defaults')
             return base_settings
         return loaded_prefs
 
@@ -128,14 +133,15 @@ class Walld:
         api_categories = self._api_get_categories
         categories_clone = self.categories.copy()  # TODO REDO
         sub_cats = [i[1][0] for i in api_categories.items()]
-        for key, value in categories_clone.items():
-            if key not in api_categories:
-                log.warning(f"{key} is not found in api response, is everything okay?")
-                del self.categories[key]
-            for i in value:
+        for category, sub_category in categories_clone.items():
+            if category not in api_categories:
+                log.warning(f"{category} is not found in api response, is everything okay?")
+                del self.categories[category]
+                continue
+            for i in sub_category:
                 if i['name'] not in sub_cats:
-                    index = self._find_index(self.categories[key], i['name'])  # TODO delete subcat if it`s not presented
-                    del self.categories[key][index]
+                    index = self._find_index(self.categories[category], i['name'])  # TODO delete subcat if it`s not presented
+                    del self.categories[category][index]
 
         for key, value in api_categories.items():
             if key not in self.categories:
