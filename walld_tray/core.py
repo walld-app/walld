@@ -31,8 +31,9 @@ class Walld:
     def __init__(self, api, main_folder=MAIN_FOLDER):
         self.main_folder = main_folder
         self.api = api
-        self.save_path = self.main_folder / 'walls'
+        self.default_download_path = self.main_folder / 'walls'
         self.prefs_path = self.main_folder / 'prefs.json'
+        self.download_path = self.prefs['system']['download_path']
         self.prefs_in_mem = self.prefs  # TODO REDO
         self.temp_wall = self.main_folder / 'temp.jpg'
         self.categories = self.prefs.get('categories')
@@ -45,10 +46,10 @@ class Walld:
         """
         Copy image to specific(if passed)
         folder or to standard
-        self.save_path path
+        self.download_path path
         """
         if not path:
-            path = self.save_path / f"{str(uuid4())}.png"
+            path = self.download_path / f"{str(uuid4())}.png"
 
         shutil.copyfile(self.temp_wall, path)  # nosec wont fix
         log.info(f"saved at {path}")
@@ -100,7 +101,7 @@ class Walld:
     @property
     # TODO REDO
     def prefs(self):
-        base_settings = dict(categories=dict(), system=dict(save_path=self.save_path), tags=dict())
+        base_settings = dict(categories=dict(), system=dict(download_path=str(self.default_download_path)), tags=dict())
         if not self.prefs_path.exists():
             return base_settings
 

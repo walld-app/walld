@@ -29,7 +29,7 @@ class SettingsSystem(QWidget):
 
 
 class Ui(QMainWindow):
-    def __init__(self, walld, icon: QtGui.QIcon):
+    def __init__(self, walld: Walld, icon: QtGui.QIcon):
         super().__init__()
         uic.loadUi(TEMPLATE_DIR / "settings.ui", self)  # Load the .ui file
         #  self.show()  # Show the GUI
@@ -45,7 +45,6 @@ class Ui(QMainWindow):
         self.RightMenu.addWidget(self.setting_system)
         self.category_widget.hide()
         self.setting_system.hide()
-        self.change_field_to_download_field()
 
     def _gen_categories_buttons(self):
         self.cats_buttons = {}
@@ -73,10 +72,10 @@ class Ui(QMainWindow):
 
         self.category_widget.SubCategoriesLayout.addSpacerItem(spacer)
         self.category_widget.CategoriesLayout.addSpacerItem(spacer)
-
-    def change_field_to_download_field(self):
-        # TODO
-        self.setting_system.folder_path.setPlainText(str(self.walld.save_path))
+        if len(self.walld.download_path) > 65:
+            self.setting_system.folder_path.setText(f'{self.walld.download_path[:65]}...')
+        else:
+            self.setting_system.folder_path.setText(self.walld.download_path)
 
     def bring_sub_categories(self, category):
         self.hide_buttons('sub_categories')
@@ -101,9 +100,13 @@ class Ui(QMainWindow):
         self.walld.prefs = self.walld.prefs_in_mem
 
     def folder_button(self):
-        name, _ = QFileDialog.getOpenFileName(self, "Open File")
-        self.walld.prefs_in_mem['download_path'] = name
-        self.walld.dump_prefs()
+        name = QFileDialog.getExistingDirectory(self, "Name the directory")
+        if name:
+            self.walld.prefs_in_mem['system']['download_path'] = name
+            self.walld.dump_prefs()
+            if len(name) > 65:
+                name = f'{name[:65]}...'
+            self.setting_system.folder_path.setText(name)
 
 
 class UiCtrl:
