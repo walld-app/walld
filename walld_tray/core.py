@@ -31,9 +31,10 @@ class Walld:
     def __init__(self, api, main_folder=MAIN_FOLDER):
         self.main_folder = main_folder
         self.api = api
+        self.default_download_path = self.main_folder / 'walls'
         self.prefs_path = self.main_folder / 'prefs.json'
+        self.download_path = self.prefs['system']['download_path']
         self.prefs_in_mem = self.prefs  # TODO REDO
-        self.save_path = self.main_folder / 'saved'
         self.temp_wall = self.main_folder / 'temp.jpg'
         self.categories = self.prefs.get('categories')
         self._sync_categories()
@@ -45,10 +46,10 @@ class Walld:
         """
         Copy image to specific(if passed)
         folder or to standard
-        self.save_path path
+        self.download_path path
         """
         if not path:
-            path = self.save_path / f"{str(uuid4())}.png"
+            path = self.download_path / f"{str(uuid4())}.png"
 
         shutil.copyfile(self.temp_wall, path)  # nosec wont fix
         log.info(f"saved at {path}")
@@ -94,9 +95,13 @@ class Walld:
         request = get(self.api, params=params).json()
         return request['categories']
 
+    def dump_prefs(self):
+        self.prefs = self.prefs_in_mem
+
     @property
+    # TODO REDO
     def prefs(self):
-        base_settings = dict(categories=dict(), system=dict(), tags=dict())
+        base_settings = dict(categories=dict(), system=dict(download_path=str(self.default_download_path)), tags=dict())
         if not self.prefs_path.exists():
             return base_settings
 
@@ -104,6 +109,7 @@ class Walld:
             loaded_prefs = json.load(file)
 
         if loaded_prefs.keys() != base_settings.keys():
+            log.error('JSON file was corrupted and will restore to defaults')
             return base_settings
         return loaded_prefs
 
@@ -128,14 +134,15 @@ class Walld:
         api_categories = self._api_get_categories
         categories_clone = self.categories.copy()  # TODO REDO
         sub_cats = [i[1][0] for i in api_categories.items()]
-        for key, value in categories_clone.items():
-            if key not in api_categories:
-                log.warning(f"{key} is not found in api response, is everything okay?")
-                del self.categories[key]
-            for i in value:
+        for category, sub_category in categories_clone.items():
+            if category not in api_categories:
+                log.warning(f"{category} is not found in api response, is everything okay?")
+                del self.categories[category]
+                continue
+            for i in sub_category:
                 if i['name'] not in sub_cats:
-                    index = self._find_index(self.categories[key], i['name'])  # TODO delete subcat if it`s not presented
-                    del self.categories[key][index]
+                    index = self._find_index(self.categories[category], i['name'])  # TODO delete subcat if it`s not presented
+                    del self.categories[category][index]
 
         for key, value in api_categories.items():
             if key not in self.categories:
