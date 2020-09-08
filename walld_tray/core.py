@@ -31,9 +31,9 @@ class Walld:
     def __init__(self, api, main_folder=MAIN_FOLDER):
         self.main_folder = main_folder
         self.api = api
+        self.save_path = self.main_folder / 'walls'
         self.prefs_path = self.main_folder / 'prefs.json'
         self.prefs_in_mem = self.prefs  # TODO REDO
-        self.save_path = self.main_folder / 'walls'
         self.temp_wall = self.main_folder / 'temp.jpg'
         self.categories = self.prefs.get('categories')
         self._sync_categories()
