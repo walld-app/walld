@@ -31,11 +31,10 @@ class SettingsSystem(QWidget):
 class Ui(QMainWindow):
     def __init__(self, walld: Walld, icon: QtGui.QIcon):
         super().__init__()
-        uic.loadUi(TEMPLATE_DIR / "settings.ui", self)  # Load the .ui file
-        #  self.show()  # Show the GUI
+        uic.loadUi(TEMPLATE_DIR / "settings.ui", self)
         self.category_widget = CategoryWidget()
         self.setting_system = SettingsSystem()
-        self.walld = walld  # TODO it will crash if walld is not connected to a service
+        self.walld = walld
         self.icon = icon
         self.tray = QSystemTrayIcon()
         self.tray.setIcon(self.icon)
@@ -55,7 +54,6 @@ class Ui(QMainWindow):
             ll.setMinimumSize(QSize(0, 40))
 
             self.cats_buttons[i] = dict(category=ll, sub_categories=[])
-            # make for loop for iterating over sub category
 
             for sub_category in self.walld.categories[i]:
                 sub_category_button = QPushButton(sub_category['name'])
@@ -72,10 +70,10 @@ class Ui(QMainWindow):
 
         self.category_widget.SubCategoriesLayout.addSpacerItem(spacer)
         self.category_widget.CategoriesLayout.addSpacerItem(spacer)
-        if len(self.walld.download_path) > 65:
-            self.setting_system.folder_path.setText(f'{self.walld.download_path[:65]}...')
+        if len(str(self.walld.download_path)) > 65:
+            self.setting_system.folder_path.setText(f'{str(self.walld.download_path)[:65]}...')
         else:
-            self.setting_system.folder_path.setText(self.walld.download_path)
+            self.setting_system.folder_path.setText(str(self.walld.download_path))
 
     def bring_sub_categories(self, category):
         self.hide_buttons('sub_categories')
@@ -134,7 +132,7 @@ class UiCtrl:
 
 
 def main():
-    walld = Walld(API)  # TODO Exception for not connecting
+    walld = Walld(API)
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
     window = Ui(walld, b64_to_icon(ICON))

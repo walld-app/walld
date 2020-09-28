@@ -95,12 +95,7 @@ class DesktopEnvironment:
         log.debug(f"DE - {self.name}, Tool - {str(self.tool_path)}")
 
     def _find_tools(self):
-        try:
-            import pywall
-        except ImportError:
-            pass
-        else:
-            self.pywal_presented = True
+        self.pywal_presented = True if which('wal') else False
 
         tool_path = which(getattr(DETools, self.name.replace('-', '_')))
 
@@ -118,13 +113,10 @@ class DesktopEnvironment:
                     "'{print $2}'")
             self.name = subprocess.check_output(code, shell=True).decode('ascii').rstrip().lower()
 
-    def set_wall(self, file_name: Path, apply_theme: bool = False):
+    def set_wall(self, file_name: Path):
         """
         Function that, depending on DE, sets walls'''
         """
-        if apply_theme and self.pywal_presented:
-            # pywall stuff
-            pass
 
         if self.name == 'xfce':
             mon_list = subprocess.check_output(f'{self.tool_path} -c '
@@ -152,7 +144,7 @@ class DesktopEnvironment:
                             'picture-uri', '"file://' + file_name + '"'])
 
         elif self.name == 'i3':
-            subprocess.run([self.tool_path, '--bg-center', file_name])
+            subprocess.run([self.tool_path, '--bg-fill', file_name])
 
         elif self.name == 'windows':
             # this is windows specific stuff
@@ -165,3 +157,7 @@ class DesktopEnvironment:
                              'wallpaper', '-value', file_name])
             subprocess.call([which('rundll32.exe'),
                              'user32.dll,', 'UpdatePerUserSystemParameters'])
+
+    @staticmethod
+    def change_theme(file):  # todo change naming behavior bc pywal caches name "temp.jpg"
+        subprocess.call(['wal', '-i', file, '-n'])  # todo redo to pywal imported
