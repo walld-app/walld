@@ -67,6 +67,9 @@ class Walld:
         url = self.get_url()['url']
         wallpaper_log.info(f"Setting up wallpaper from {url}")
         file = download(url, self.main_folder / 'temp.jpg')
+        if self.de.pywal_presented and self.prefs_in_mem['system'].get('apply_themes'):
+            log.info('Changing theme!')
+            self.de.change_theme(file)
         self.de.set_wall(file)
 
     def _get_checked_categories(self):
@@ -112,7 +115,8 @@ class Walld:
     @property
     def prefs_on_disk(self) -> dict:
         base = dict(categories=dict(),
-                    system=dict(download_path=str(self.default_download_path)),
+                    system=dict(download_path=str(self.default_download_path),
+                                apply_themes=False),
                     tags=dict())
 
         if not self.prefs_path.exists():
