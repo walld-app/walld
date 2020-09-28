@@ -2,7 +2,10 @@
 import ctypes  # MANY THANKS TO J.J AND MESKSR DUDES YOU SAVED MY BURNED UP ASS
 import platform
 import subprocess
+from dataclasses import dataclass
 from pathlib import Path
+from shutil import which
+from time import sleep
 
 import requests
 from PyQt5 import QtCore, QtGui
@@ -11,19 +14,25 @@ from requests import get
 from config import log
 
 
-def api_talk_handler(function):  # TODO retry, exceptions for http errors
+def retry(function, count: int = 3, interval: int = 0.1):
     def wrapper(*args, **kwargs):
-        for _ in range(5):
+        range_ = list(range(1, count+1))[::-1]
+        error: Exception
+        for num in range_:
             try:
                 final = function(*args, **kwargs)
                 return final
-            except (requests.exceptions.ConnectionError,
-                    requests.exceptions.ConnectTimeout):
-                print('Something is happening with server, trying again...')
-        print('giving up')
+            except Exception as e:
+                error = e
+                log.error(f'Attempt - {num}/{count}\n'
+                          f'Retrying after exception {str(e)}')
+                sleep(interval)
+        log.fatal(f'Giving up after {count} retries')
+        raise error
     return wrapper
 
 
+@retry
 def download(url: str, file_name: Path) -> Path:
     """
     Downloads file to specified location
@@ -31,13 +40,18 @@ def download(url: str, file_name: Path) -> Path:
     :param file_name filepath WITH name to save
     """
     try:
-        response = get(url)
-    except requests.exceptions.ConnectionError:
         url = url.replace('s', '', 1)
         response = get(url)
+    except requests.exceptions.ConnectionError:
+        response = get(url)
+
+    finally:
+        if response.status_code != 200:
+            raise
 
     with open(file_name, "wb") as file:
         file.write(response.content)
+
     return file_name
 
 
@@ -59,53 +73,86 @@ def b64_to_icon(base64: bytes) -> QtGui.QIcon:
     return icon
 
 
+@dataclass
+class DETools:
+    i3 = 'feh'
+    gnome = 'gsettings'
+    xfce = 'xfconf-query'
+    mate = gnome
+    cinnamon2d = gnome
+    lightdm_xsession = gnome
+    windows = 'powershell'
+
+
 class DesktopEnvironment:
     def __init__(self):
         self.name: str
         self.current_wallpaper: str  # not implemented
+        self.pywal_presented = False
         self._detect_desktop_environment()
-        log.debug(f"DE - {self.name}")
+        self.tool_path: Path
+        self._find_tools()
+        log.debug(f"DE - {self.name}, Tool - {str(self.tool_path)}")
+
+    def _find_tools(self):
+        try:
+            import pywall
+        except ImportError:
+            pass
+        else:
+            self.pywal_presented = True
+
+        tool_path = which(getattr(DETools, self.name.replace('-', '_')))
+
+        if not tool_path:
+            raise FileNotFoundError(f'cant file binary for changing walls!')
+
+        self.tool_path = tool_path
 
     def _detect_desktop_environment(self):
         if platform.system() == 'Windows':  # Here comes windows specific stuff
             self.name = platform.system().lower()
 
         else:
-            code = ("/usr/bin/env | /usr/bin/grep DESKTOP_SESSION= "
-                    "| /usr/bin/awk -F= '{print $2}'")
+            code = (f"{which('env')} | {which('grep')} DESKTOP_SESSION= | {which('awk')} -F= "
+                    "'{print $2}'")
             self.name = subprocess.check_output(code, shell=True).decode('ascii').rstrip().lower()
 
-    def set_wall(self, file_name: Path):
+    def set_wall(self, file_name: Path, apply_theme: bool = False):
         """
         Function that, depending on DE, sets walls'''
         """
+        if apply_theme and self.pywal_presented:
+            # pywall stuff
+            pass
+
         if self.name == 'xfce':
-            mon_list = subprocess.check_output('/usr/bin/xfconf-query -c '
+            mon_list = subprocess.check_output(f'{self.tool_path} -c '
                                                'xfce4-desktop -l | grep '
                                                '"workspace0/last-image"',
                                                shell=True).split()  # nosec, rewrite
             for i in mon_list:
-                subprocess.call(['/usr/bin/xfconf-query',  # nosec
+                subprocess.call([self.tool_path,  # nosec
                                  '--channel', 'xfce4-desktop', '--property',
                                  i, '--set', file_name])
 
-        elif self.name == ('mate' or 'lightdm-xsession'):  # experimental
-            subprocess.run(['/usr/bin/gsettings', 'set',  # nosec wont fix
+        elif self.name in ('mate', 'lightdm-xsession'):  # experimental
+            subprocess.run([self.tool_path, 'set',  # nosec wont fix
                             'org.mate.background', 'picture-filename',
                             file_name])
 
         elif self.name == 'gnome':  # experimental
-            subprocess.run(['/usr/bin/gsettings', 'set',  # nosec wont fix
+            subprocess.run([self.tool_path, 'set',  # nosec wont fix
                             'org.gnome.desktop.background',
                             'picture-uri', '"file://' + file_name + '"'])
 
         elif self.name == 'cinnamon2d':
-            subprocess.run(['/usr/bin/gsettings', 'set',  # nosec wont fix
+            subprocess.run([self.tool_path, 'set',  # nosec wont fix
                             'org.cinnamon.desktop.background',
                             'picture-uri', '"file://' + file_name + '"'])
 
         elif self.name == 'i3':
-            subprocess.run(['/usr/bin/feh', '--bg-scale', file_name])
+            subprocess.run([self.tool_path, '--bg-center', file_name])
 
         elif self.name == 'windows':
             # this is windows specific stuff
@@ -116,5 +163,5 @@ class DesktopEnvironment:
             subprocess.call(['powershell', 'Set-ItemProperty', '-path',
                              '\'HKCU:\\Control Panel\\Desktop\\\'', '-name',
                              'wallpaper', '-value', file_name])
-            subprocess.call(['rundll32.exe',
+            subprocess.call([which('rundll32.exe'),
                              'user32.dll,', 'UpdatePerUserSystemParameters'])

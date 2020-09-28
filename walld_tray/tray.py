@@ -97,7 +97,7 @@ class Ui(QMainWindow):
                 self.walld.prefs_in_mem['categories'][category][num]['checked'] = button.isChecked()
                 break
 
-        self.walld.prefs = self.walld.prefs_in_mem
+        self.walld.prefs_on_disk = self.walld.prefs_in_mem
 
     def folder_button(self):
         name = QFileDialog.getExistingDirectory(self, "Name the directory")

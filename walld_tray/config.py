@@ -17,9 +17,9 @@ except ImportError:
 MAIN_FOLDER = Path().home() / '.walld'
 SYS_LOG_PATH = MAIN_FOLDER / 'sys.log'
 WALLPAPER_LOG_PATH = MAIN_FOLDER / 'wallpaper.log'
-API = getenv("API", "https://api.walld.kz159.ru/8080/v1")
+API = getenv("API", "https://walld.kz159.ru/api")
 
-_log_formatter = Formatter("%(asctime)s [%(levelname)-5.5s] - %(message)s")
+_log_formatter = Formatter("%(asctime)s [%(levelname)-1.1s] - %(message)s")
 
 log = getLogger('walld_tray')
 wallpaper_log = getLogger('walld_tray_user')
