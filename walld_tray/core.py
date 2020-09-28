@@ -33,8 +33,13 @@ class Walld:
         self.api = api
         self.default_download_path = self.main_folder / 'walls'
         self.prefs_path = self.main_folder / 'prefs.json'
+<<<<<<< HEAD
         self.download_path = Path(self.prefs_on_disk['system']['download_path'])
         self.prefs_in_mem: Dict = self.prefs_on_disk
+=======
+        self.download_path = self.prefs['system']['download_path']
+        self.prefs_in_mem = self.prefs  # TODO REDO
+>>>>>>> b083af7042a0f176f860ac10ab69b6cba3344cce
         self.temp_wall = self.main_folder / 'temp.jpg'
         self.categories: Dict = self.prefs_on_disk.get('categories')
         self.connected = False
@@ -133,6 +138,9 @@ class Walld:
             log.error('JSON file was corrupted and will restore to defaults')
             return base
 
+        if loaded_prefs.keys() != base_settings.keys():
+            log.error('JSON file was corrupted and will restore to defaults')
+            return base_settings
         return loaded_prefs
 
     @prefs_on_disk.setter
@@ -156,6 +164,7 @@ class Walld:
         api_categories = self._api_get_categories()
         categories_clone = self.categories.copy()  # TODO REDO
         sub_cats = [i[1][0] for i in api_categories.items()]
+
 
         for category, sub_category in categories_clone.items():
             if category not in api_categories:
