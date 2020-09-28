@@ -133,9 +133,9 @@ class Walld:
             log.error('JSON file was corrupted and will restore to defaults')
             return base
 
-        if loaded_prefs.keys() != base_settings.keys():
+        if loaded_prefs.keys() != base.keys():
             log.error('JSON file was corrupted and will restore to defaults')
-            return base_settings
+            return base
         return loaded_prefs
 
     @prefs_on_disk.setter
@@ -159,7 +159,6 @@ class Walld:
         api_categories = self._api_get_categories()
         categories_clone = self.categories.copy()  # TODO REDO
         sub_cats = [i[1][0] for i in api_categories.items()]
-
 
         for category, sub_category in categories_clone.items():
             if category not in api_categories:
