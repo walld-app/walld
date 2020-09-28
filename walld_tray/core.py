@@ -33,13 +33,8 @@ class Walld:
         self.api = api
         self.default_download_path = self.main_folder / 'walls'
         self.prefs_path = self.main_folder / 'prefs.json'
-<<<<<<< HEAD
         self.download_path = Path(self.prefs_on_disk['system']['download_path'])
         self.prefs_in_mem: Dict = self.prefs_on_disk
-=======
-        self.download_path = self.prefs['system']['download_path']
-        self.prefs_in_mem = self.prefs  # TODO REDO
->>>>>>> b083af7042a0f176f860ac10ab69b6cba3344cce
         self.temp_wall = self.main_folder / 'temp.jpg'
         self.categories: Dict = self.prefs_on_disk.get('categories')
         self.connected = False
